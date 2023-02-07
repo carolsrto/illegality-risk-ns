@@ -1,5 +1,5 @@
 # Repository Overview
-This repository is under development. It will contain the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study will be made available through Zenodo upon publication and is now accessible [in this link here](https://chalmers-my.sharepoint.com/:f:/g/personal/franca_chalmers_se/EkG_O4WZAvNMlKcpPH0ZPRYBQEL5vjfjow54jXC58OvgIA)
+This repository is under development. It will contain the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study will be made available through Zenodo upon publication and is now accessible [in this link here](https://chalmers-my.sharepoint.com/:f:/g/personal/franca_chalmers_se/EkG_O4WZAvNMlKcpPH0ZPRYBBibInEe1BEhhKP5sfVpjSg?e=QK8xhj)
 
 ## Citation
 Franca, S.S.C., Persson, M., Carvalho, T., Lentini, M. Putting numbers on timber illegality risk: the case of ipê in Pará, 21 December 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-2297880/v1]
@@ -9,7 +9,7 @@ Franca, S.S.C., Persson, M., Carvalho, T., Lentini, M. Putting numbers on timber
 Code
 - data collection when automated
 - data import and pre-processing
-- implementation of imput-output model and environmental extension
+- implementation of input-output model and environmental extensions
 - manuscript graphics 
 - LaTeX files
 
@@ -23,7 +23,7 @@ Data
 
 For a *last mile* reproduction of study numbers and figures, load the "illegality-risk-vyc44.Rdata". The file can be directly used with *mapping-illegality-risks.R*.
 
-For the reproduction of the "input-output-model.R" analysis, the needed data objects are available from "illegality-risk-v1.0.Rdata".     
+For the reproduction of the "input-output-model.R" analysis, the needed data objects are available from "illegality-risk-v1.1.Rdata".     
 
 
 ## Repository Structure
@@ -37,8 +37,8 @@ For the reproduction of the "input-output-model.R" analysis, the needed data obj
 |   |   |   |-- ...
 |   |   |-- temp/
 |   |   |-- processed/
-|   |   |   |-- illegality-risk-v1.0.RData <-- available through Zenodo
-|   |   |   |-- illegality-risk-vyc44.RData <-- available through Zenodo
+|   |   |   |-- illegality-risk-v1.1.RData <-- will be available through Zenodo
+|   |   |   |-- illegality-risk-vyc44.RData <-- will be available through Zenodo
 |   |-- results/
 |   |-- src/
 |   |   |-- data-collection-and-pre-processing/
