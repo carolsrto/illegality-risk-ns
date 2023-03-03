@@ -76,4 +76,8 @@ This work is licensed under a
   Creative Commons Attribution 3.0 Unported License
 </a>.
 <br />
-Check the [LICENSE](https://github.com/carolsrto/illegality-risk-ns/blob/main/LICENSE) for more details
+Check the 
+<a rel="license" href="https://github.com/carolsrto/illegality-risk-ns/blob/main/LICENSE">
+LICENSE
+</a> 
+for more details
