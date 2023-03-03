@@ -64,3 +64,16 @@ For the reproduction of the "input-output-model.R" analysis, the needed data obj
 ## References 
 
 Research reproduceability based on good practices from Kitzes, J., Turek, D., & Deniz, F. (Eds.). (2018). The Practice of Reproducible Research: Case Studies and Lessons from the Data-Intensive Sciences. Oakland, CA: University of California Press. 
+
+
+## License
+<a rel="license" href="http://creativecommons.org/licenses/by/3.0/">
+  <img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/3.0/88x31.png" /> 
+</a>
+<br />
+This work is licensed under a 
+<a rel="license" href="http://creativecommons.org/licenses/by/3.0/">
+  Creative Commons Attribution 3.0 Unported License
+</a>.
+<br />
+Check the [LICENSE](https://github.com/carolsrto/illegality-risk-ns/blob/main/LICENSE) for more details
