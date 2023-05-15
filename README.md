@@ -1,5 +1,5 @@
 # Repository Overview
-This repository is under development. It will contain the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study will be made available through Zenodo upon publication and is now accessible [in this link here](https://chalmers-my.sharepoint.com/:f:/g/personal/franca_chalmers_se/EkG_O4WZAvNMlKcpPH0ZPRYBBibInEe1BEhhKP5sfVpjSg?e=QK8xhj)
+This repository is under development. It will contain the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study will be made available through Zenodo upon publication and is now accessible [in this link here](https://chalmers-my.sharepoint.com/:f:/g/personal/franca_chalmers_se/EkG_O4WZAvNMlKcpPH0ZPRYBBibInEe1BEhhKP5sfVpjSg?e=h2GFdW)
 
 ## Citation
 Franca, S.S.C., Persson, M., Carvalho, T., Lentini, M. Putting numbers on timber illegality risk: the case of ipê in Pará, 21 December 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-2297880/v1]
