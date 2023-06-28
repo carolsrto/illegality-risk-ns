@@ -1,10 +1,14 @@
 # Input-Output model application ------------------------------------------
 
-# This script is under development. It contains the implementation of the
-# environmentally extended input-output analysis for the ipê timber supply chain
-# for the case of Pará, Brazil between 2009-2019. It also provides more details
-# on rationale behind flow inclusion for this analysis, following descriptions
-# under methods and supplementary text.
+# This script is currently under development/refinement. This script contains
+# the implementation of the environmentally extended input-output analysis for
+# the ipê timber supply chain for the case of Pará, Brazil between 2009-2019. It
+# also provides more details on rationale behind flow inclusion for this
+# analysis, following descriptions under methods and supplementary text. 
+
+# Reach out if you have suggestions for improvement, feedback or ideas for
+# collaboration. See https://github.com/carolsrto/illegality-risk-ns or e-mail
+# directly at caroline.franca@chalmers.se
 
 
 
@@ -30,10 +34,10 @@ options(digits=14)
 
 # Importing data ----------------------------------------------------------
 
-#loading from .RData
-load("./data/processed/illegality-risk-v1.0.RData")
+# loading objects from .RData
+load("./data/processed/illegality-risk-v1.1.RData")
 
-# illegality-risk-v1.0.RData loads the following objects: 
+# illegality-risk-v1.1.RData loads the following objects: 
 
 # - transport:
 # Includes a compilation of:
@@ -49,10 +53,10 @@ load("./data/processed/illegality-risk-v1.0.RData")
 # of variables relevant for the study.
 
 # - conversion_baseline: list of selected products for the analysis with
-#respective conversion factors and product translation.
+# respective conversion factors and product translation.
 
-# - lp: logging permit details such as area authorized, permit status and 
-# geolocation.
+# - lp: compilation of logging permits with details such as such as area authorized,
+# permit status and geolocation.
 
 
 # Parameter selection & Pre-processing ------------------------------------
@@ -73,7 +77,8 @@ species <- "HANDROANTHUS|TABEBUIA"
 # Base conversion factor
 base_vyc <- 44.5
 # N.B. In this version, change VYC here for numbers on upper-lower boundaries
-# (i.e. high efficiency: 53.9, low efficiency: 35)
+# (i.e. high efficiency: 53.9, low efficiency: 35). Study's figures are mostly
+# based in this 44.5 mid-point and thus it is advisable you start here.
 
 # Products conversion key baseline
 conversion_key <- conversion_baseline |> 
@@ -91,7 +96,7 @@ rm(conversion_baseline)
 # N.B. Run for different parameters at the moment is still manual. Keep in mind
 # this script removes intermediary objects, including the initially loaded data.
 
- 
+
 
 ## Transport transactions subset ---------------------------------------------
 
@@ -113,7 +118,7 @@ transport_df1 <- transport |>
 
 # Developed under "08_actors.R" in order to account for LGPD.
 transport_df2 <- transport_df1
-rm(transport_df1)
+rm(transport, transport_df1)
 
 # P vector, Part 1: Data Inclusion & Pre-processing  --------------------------
 
@@ -180,7 +185,7 @@ rw_sp <- transport_df2 |>
          # Remove RW coming from other states
          UF_ORIGIN == "PA") |> 
   # Remove SINAFLOR flows that do not have permit
-   # create column to filter out cases
+  # create column to filter out cases
   unite(PERMIT, PERMIT_NUM_AUTEX_SERIE, col = "RM", sep = "_", remove = FALSE) |> 
   filter(RM != "NA_NA") |> 
   select(-RM) |> 
@@ -581,7 +586,7 @@ sp_matrix_df3 <- sp_matrix_df2 |>
 
 # Removing exports from SINAFLOR and working with Exports from SISFLORA-PA only
 sp_matrix_df4 <- sp_matrix_df3 |> filter(!(!is.na(TYPE_DESTINATION) & 
-                            TYPE_DESTINATION == "EXPORT" & SYSTEM == "SINAFLOR"))
+                                             TYPE_DESTINATION == "EXPORT" & SYSTEM == "SINAFLOR"))
 
 # N.B. For now all exports from SINAFLOR are removed. SINAFLOR data is missing
 # from 2017-2019 (also all period since) and deduplication at export level
@@ -656,7 +661,7 @@ for (i in analysis_period) {
     select(-DIGITS) |> 
     rowid_to_column() |> 
     ungroup()
-
+  
   # Find duplicate rows to remove from SINAFLOR
   dedupe_key_df2 <- dedupe_key_df1 |>
     group_by(KEY_DUP, VOLUME) |> 
@@ -667,22 +672,22 @@ for (i in analysis_period) {
     ungroup()
   
   pull_rm <- anti_join(dedupe_key_df1, dedupe_key_df2, by = "rowid") |> pull(rowid)
-
+  
   rows_to_rm <- indices[pull_rm] |> unlist()
-
+  
   deduped <- dedupe_key |> 
     ungroup() |> 
     rowid_to_column() |> #to check whether correct rows have been dropped
     slice(-rows_to_rm)
   
-
+  
   # Collect stats
   n_rm <- length(rows_to_rm)
   vol_rm <- (data |> filter(ID_YEAR == i) |> summarise(sum(VOLUME))) - 
     (deduped |>  summarise(sum(VOLUME)))
   
   stats <- tibble(N_RM = n_rm, VOL_RM = vol_rm, ID_YEAR = i) #not true volume because of rounding
-            
+  
   dedupe_stats <- bind_rows(dedupe_stats, stats)
   
   # Save deduped dataframe
@@ -816,7 +821,7 @@ Z <- rwe_sp_all_actors |>
 # Check whether there are any values for the diagonal 
 sum(diag(Z))
 
-# rm(sp_matrix, sp_matrix_df1, sp_matrix_df2, sp_matrix_df3, sp_matrix_df4, sp_matrix_df5, 
+# rm(sp_matrix, sp_matrix_df1, sp_matrix_df2, sp_matrix_df3, sp_matrix_df4, sp_matrix_df5,
 #    all_CPF_CNPJ_GEOCMUN_origin, all_CPF_CNPJ_GEOCMUN_destination, rwe_sp_all_actors, rwe_sp_pre)
 
 
@@ -1160,8 +1165,10 @@ Rc <- diag(c) %*% R |>
 end_time <- Sys.time()
 end_time - start_time
 
+
+
 # Clean env. 
-rm(R, c, start_time, end_time)
+# rm(R, c, start_time, end_time)
 
 
 
@@ -1194,8 +1201,8 @@ p_sp_lp <- transport_df2 |> # If not starting from transport_df2, than apply par
   subset(!(CPF_CNPJ_ORIGIN == CPF_CNPJ_DESTINATION))
 
 # Pre-process permit data from the p vector for match with lp information 
-  # Address state-level logging permits (AUTEF). Separate PROCESS and PERMIT into
-  # four columns (tidying) for joining data set
+# Address state-level logging permits (AUTEF). Separate PROCESS and PERMIT into
+# four columns (tidying) for joining data set
 p_sp_lp <- p_sp_lp |> 
   separate(PROCESS, into = c("PROCESS_YEAR", "PROCESS_NUMBER"), sep = "/")|>  
   separate(PERMIT, into = c("PERMIT_NUMBER", "PERMIT_YEAR"), sep = "/")|>  
@@ -1284,7 +1291,7 @@ share_status <- share_status |>
   mutate(SHARE_VALID_OVERSTATED = VALID_OVERSTATED/TOTAL) |> 
   mutate(SHARE_INVALID_MISSING = INVALID_MISSING/TOTAL) |> 
   mutate(SHARE_AUTEX = AUTEX/TOTAL)
-  
+
 # Checking total volume still the same
 sum(share_status$TOTAL)
 
@@ -1351,10 +1358,10 @@ valid_cons <- Rc %*% diag(E_irisk_valid) |>
 
 valid_overst_cons <- Rc %*% diag(E_irisk_valid_overst) |> 
   magrittr::set_colnames(rownames(Rc))
-  
+
 invalid_missing_cons <- Rc %*% diag(E_irisk_invalid_missing) |> 
   magrittr::set_colnames(rownames(Rc))
-  
+
 autex_cons <- Rc %*% diag(E_irisk_autex) |> 
   magrittr::set_colnames(rownames(Rc))
 
@@ -1386,11 +1393,16 @@ ee_autex_cons <- autex_cons |>
 rw <- p_sp_lp
 
 # Clean env. 
-rm(p_sp, p_sp_lp, join_p_lp_data, join_vol_lp_data, share_status, data_env_ext,
+rm(Rc, p_sp, p_sp_lp, join_p_lp_data, join_vol_lp_data, share_status, data_env_ext,
    E_irisk_df1, E_irisk_df2, E_irisk_df3,
    E_irisk_valid, E_irisk_valid_overst, E_irisk_invalid_missing, E_irisk_autex,
    valid_cons, invalid_missing_cons, autex_cons, analysis_period, base_vyc, species, 
    transaction_status)
+
+rm(all_CPF_CNPJ_GEOCMUN_destination, all_CPF_CNPJ_GEOCMUN_origin, dmid, all_CPF_CNPJ_GEOCMUN, 
+   conversion_key, p_all_CPF_CNPJ_GEOCMUN, rwe_sp, rwe_sp_all_actors, rwe_sp_pre, sp_matrix, 
+   sp_matrix_df1, sp_matrix_df2, sp_matrix_df3, sp_matrix_df4, sp_matrix_df5, rw_sp, 
+   valid_overst_yield, valid_overst_cons, cols_to_remove)
 
 # Saving outputs 
 # Env. extensions 
@@ -1399,11 +1411,23 @@ rm(p_sp, p_sp_lp, join_p_lp_data, join_vol_lp_data, share_status, data_env_ext,
 
 # Objects used in "12_mapping-illegality-risks.R"
 
-save(ee_valid_cons, ee_valid_overst_cons, ee_invalid_missing_cons, ee_autex_cons, 
-     io_CPF_CNPJ_GEOCMUN, p_outer_state, cons_discrep, rw,
-     file="./data/processed/illegality-risk-vyc44_XXXX.Rdata")
+# save(ee_valid_cons, ee_valid_overst_cons, ee_invalid_missing_cons, ee_autex_cons,
+#       io_CPF_CNPJ_GEOCMUN, p_outer_state, cons_discrep, rw, lp, transport_df2,
+#       file="./data/processed/illegality-risk-vyc44-1.X.Rdata")
 
 
 
 
+# References --------------------------------------------------------------
+
+options(citation.bibtex.max=999)
+
+citation()
+citation("tidyverse")
+citation("scales")
+citation("janitor")
+citation("sf")
+citation("patchwork")
+citation("reshape2") 
+citation("expm")
 
