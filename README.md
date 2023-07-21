@@ -1,5 +1,5 @@
 # Repository Overview
-This repository is under development. It will contain the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study will be made available through Zenodo upon publication and is now accessible [in this link here](https://chalmers-my.sharepoint.com/:f:/g/personal/franca_chalmers_se/EkG_O4WZAvNMlKcpPH0ZPRYBBibInEe1BEhhKP5sfVpjSg?e=h2GFdW)
+This repository is under development. It contains the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study is available on Zenodo at [https://doi.org/10.5281/zenodo.8068431](https://doi.org/10.5281/zenodo.8068431)
 
 ## Citation
 Franca, S.S.C., Persson, M., Carvalho, T., Lentini, M. Putting numbers on timber illegality risk: the case of ipê in Pará, 21 December 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-2297880/v1]
@@ -21,7 +21,7 @@ Data
 
 ## Instructions for results reproduction
 
-For a *last mile* reproduction of study numbers and figures, load the "illegality-risk-vyc44.Rdata". The file can be directly used with *mapping-illegality-risks.R*.
+For a *last mile* reproduction of study numbers and figures, load the "illegality-risk-vyc44-v1.1.Rdata". The file can be directly used with *mapping-illegality-risks.R*.
 
 For the reproduction of the "input-output-model.R" analysis, the needed data objects are available from "illegality-risk-v1.1.Rdata".     
 
@@ -29,7 +29,7 @@ For the reproduction of the "input-output-model.R" analysis, the needed data obj
 ## Repository Structure
 
 ```
-|-- illegality-risk/
+|-- illegality-risk-ns-main/
 |-- README.txt
 |   |-- data/
 |   |   |-- raw/
@@ -37,12 +37,12 @@ For the reproduction of the "input-output-model.R" analysis, the needed data obj
 |   |   |   |-- ...
 |   |   |-- temp/
 |   |   |-- processed/
-|   |   |   |-- illegality-risk-v1.1.RData <-- will be available through Zenodo
-|   |   |   |-- illegality-risk-vyc44.RData <-- will be available through Zenodo
+|   |   |   |-- illegality-risk-v1.1.RData <-- available on Zenodo
+|   |   |   |-- illegality-risk-vyc44-v1.1.RData <-- available on Zenodo
 |   |-- results/
 |   |-- src/
 |   |   |-- data-collection-and-pre-processing/
-|   |   |   |-- download-autef-pa/ <-- tools to auto-download autef pdf files
+|   |   |   |-- download-autef-pa/ <-- tools used to auto-download autef pdf files
 |   |   |   |-- autef-pa-scrapping/ <-- tools to scrape autef pdf data
 |   |   |   |-- 01_import-sisflora-pa.R 
 |   |   |   |-- 02_clean-sisflora-pa1.R

@@ -1,17 +1,26 @@
-# Mapping illegality risks and outputs of io analysis ---------------------
+# Mapping illegality risks and outputs of the EEIO analysis -------------------
 
-# This script is under development. It contains all code needed for the
-# reproduction of study figures and numbers. This version includes both main
-# text and supplementary figures/text. Main figures and associated data
-# wrangling and analysis are presented first followed by supporting statistics
-# and supplementary figures associated with manuscript section. 
+# This script is currently under development/refinement. It contains all code
+# needed for the reproduction of the figures and statistics from "Putting
+# numbers on timber illegality risk: the case of ipê in Pará", currently under
+# review.
+
+# This version includes material for both main and supplementary figures and
+# texts. Main figures and associated data wrangling and analyses are presented
+# first, followed by supplementary material and it has been organized -- as far
+# as possible -- in the same sequence as the main text.
+
+# Reach out if you have suggestions for improvement, feedback or ideas for
+# collaboration. See https://github.com/carolsrto/illegality-risk-ns or e-mail
+# directly at caroline.franca@chalmers.se
 
 
 
-# Setting up the work environment -----------------------------------------
+# Setting up the work environment ---------------------------------------------
 
 # Loading libraries 
 library(tidyverse)
+library(ggpmisc)
 library(janitor)
 library(geobr)
 library(sf)
@@ -35,28 +44,48 @@ options(digits=14)
 
 # Loading data ------------------------------------------------------------
 
-# Load "illegality-risk-vyc44.Rdata" 
-load("./data/processed/illegality-risk-vyc44.Rdata")
+# loading objects from .RData
+load("./data/processed/illegality-risk-vyc44-v1.1.Rdata")
 
-# "illegality-risk-vyc44.Rdata" loads the following data objects below. In
-# addition, data for replication of Brancalion et al. 2018 is loaded in the
-# figure two section.
+# "illegality-risk-vyc44-v1.1.Rdata" loads the following data objects: 
 
+# Base logging permits and subset of transport data:
 # - lp: compilation of logging permits data
 # - rw: subset of roundwood data transported out of forest of origin (GF/DOF
 # compilation for ipê, 2009-2019, all batches received/received with delay). This
 # is equivalent to the production vector.
-# - io_CPF_CNPJ_GEOCMUN: main output from the io model
+# - transport_df2: subset of all relevant transport transactions.
+
+# Outputs of EEIO model: 
+# N.B. Objects reflect the mid-point conversion efficiency of 44.5. To obtain statistics 
+# and figures for upper-lower boundaries (i.e. high efficiency: 53.9, low efficiency: 35)
+# Go back to the "input_output_model.R" and change VYC to the desired value. 
+
+# - io_CPF_CNPJ_GEOCMUN: main output from the EEIO model
 # - ee_valid_cons: env. extension share for valid lp
 # - ee_valid_ovest_cons: env. extension share for valid and overstated lp
 # - ee_invalid_missing_cons: env. extension share for missing invalid lp
 # - ee_autex_cons: env. extension share for issued under federal jurisdiction
 # - cons_discrep: vector of discrepancy between outflows and inflows
 # - p_outer_state: vector of volume inflows from other states
-# - mun: municipality data, also avaible from:
-#mun <- geobr::read_municipality(code_muni = "all", year = "2020")
-# - states: states data, also available from:
-#states <- geobr::read_state(year = "2020")
+
+# Admin boundaries:
+# - mun: municipality data, available from:
+mun <- geobr::read_municipality(code_muni = "all", year = "2020")
+# - states: states data, available from:
+states <- geobr::read_state(year = "2020")
+
+# RADAM 
+# N.B. Instructions for loading data for the replication of Brancalion et al.
+# 2018 code used as a basis for analysis of overstated yield can be found directly 
+# in the section "Fig. 2 Species yield estimation". The following loaded data objects 
+# can be used to speed up reproduction of Suppl. Fig. S4 and further instructions 
+# are provided in the code for independent reproduction of objects.
+# - dados_19ha, dados_66ha, dados_370ha: statistics summary of simulation 
+# - radam_hist_19ha, radam_hist_66ha, radam_hist_370ha: simulation histograms at 
+# different minimum area thresholds
+# - means_19ha, means_66ha, means_370ha: simulation means at different minimum 
+# area thresholds
 
 
 
@@ -144,8 +173,7 @@ data_fig1 <- data_fig1 |>
 # are issued then credited back e.g. because a shipment was not sent, etc. This
 # is at odds with the "RECEIVED" cargo from which we derive flows. Thus, given
 # ambiguity and lack of metadata to clarify standing of this share we do not
-# evaluate status. Not able to establish the associated illegality risk we
-# broadly consider this share as not being passive of illegality risk.
+# evaluate status. 
 
 # Data check
 data_fig1 |> group_by(LP_STATUS, STATUS_GROUP1) |> count()
@@ -161,11 +189,11 @@ data_fig1 <- data_fig1 |>
                                                     "CANCELLED_PERMIT SUBSTITUTION", 
                                                     "CANCELLED_ELABORATION FAILURE", 
                                                     "CANCELLED_NONCOMPLIENCE WITH CONDITIONS") ~ "CANCELLED", 
-                                  LP_STATUS %in% c("CANCELLED_ILLEGALITY") ~ "CANCELLED_ILLEGALITY", 
-                                  LP_STATUS %in% c("MISSING ACTIVATION DATE") ~ "MISSING ACTIVATION DATE", 
-                                  LP_STATUS %in% c("EMITIDA OFERTA", 
-                                                   "ESTORNADO ITEM") ~ "AUTEX", 
-                                  TRUE ~ as.character(NA))) 
+                                   LP_STATUS %in% c("CANCELLED_ILLEGALITY") ~ "CANCELLED_ILLEGALITY", 
+                                   LP_STATUS %in% c("MISSING ACTIVATION DATE") ~ "MISSING ACTIVATION DATE", 
+                                   LP_STATUS %in% c("EMITIDA OFERTA", 
+                                                    "ESTORNADO ITEM") ~ "AUTEX", 
+                                   TRUE ~ as.character(NA))) 
 # Data check
 data_fig1 |> group_by(LP_STATUS, STATUS_GROUP2) |> count()
 
@@ -274,7 +302,6 @@ fig1a <- fig1a_base +
            colour = "black", size=0.5, alpha=0.8) +
   annotate("segment", x = -53.7, xend = -52.8, y = -2.12, yend =  -1, 
            colour = "black", size=0.5, alpha=0.8) +
-  
   annotate("text", x = c(-55.2, -57.7, -52.8), y = c(-0.7, -1.9, -0.8), 
            label = c("Santarém", "Juruti", "Prainha") , 
            color="black", size=4 , angle=0, fontface="bold", parse = TRUE) +
@@ -357,22 +384,33 @@ fig1b <- ggplot() +
   theme(plot.title.position = "plot", 
         plot.title = element_text(face="bold"))
 
-# Saving fig1ab 
+# Check figure
+fig1ab <- fig1a/fig1b
+
+# Saving fig1ab, jpeg 
 jpeg("./results/fig1ab.jpeg",
      width = 10, height = 12, units = "in",
      bg = "white", res = 700)
-print(fig1a/fig1b)
+print(fig1ab)
 dev.off()
+
+# Saving fig1ab, pdf 
+# For aliasing effects in Windows OS, open with Acrobat Reader.
+ggsave(filename = "./results/fig1ab.pdf",
+       width = 10,
+       height = 12, 
+       bg = "white")
+
 
 # Clean env.
 rm(mun_pa_vol, vol_by_mun, data_col, lp_barplot, key_rw_lp, data_line, 
-   fig1a_base, fig1a, fig1b, x, y, n, annotate_vol_year)
+   fig1a_base, fig1a, fig1b, fig1ab, x, y, annotate_vol_year)
 
 
 
 # N.B. Color pallete selection: 
 # - used the  cols4all library for exploring different pallettes and later the 
-# paletteer and scico packages, which are loaded with in an used in latter figures.
+# paletteer and scico libraries, which are loaded with in an used in latter figures.
 # - all figures are based on a combination of scico-lapaz and scico-bilbao
 # - both are colorblind friendly under sequential setting, but when looking at 
 # diverging scales, e.g hcl-blue_red3 one can confirm these scales of red to blue 
@@ -384,9 +422,9 @@ rm(mun_pa_vol, vol_by_mun, data_col, lp_barplot, key_rw_lp, data_line,
 # supplementary facet wrap on individual view of valid, invalid and AUTEX.
 
 
-# Supporting Stats (Part 1) ------------------------------------------------
+# Supporting Stats (Part 1) --------------------------------------------------
 
-### Volume by mun and lp status -----------------------------------
+### Volume by mun and lp status ----------------------------------------------
 
 # Wrangling for stats:
 # Permit data from the transport side, now including year and municipality
@@ -414,7 +452,7 @@ data_stats_mun |>
   filter(LP_STATUS == "UNDETERMINED") |> 
   group_by(LP_STATUS) |> 
   summarise(sum(VOLUME))
-  
+
 data_stats_mun <- data_stats_mun |> filter(LP_STATUS != "UNDETERMINED") 
 
 
@@ -442,9 +480,10 @@ top_mun
 sum((data_stats_mun |> filter(MUNICIPALITY %in% top_mun))$VOLUME)/sum(rw$VOLUME)
 #[1] 0.38252185770132
 
-# N.B. "In particular, just three municipalities---Santarém, Juruti and Prainha---in
+# N.B. "Just three municipalities---Santarém, Juruti and Prainha---in
 # the mid-west of the state together account for nearly 38% of volume logged
 # over the period 2009-2019."
+
 
 
 # Mun make up in 2009 vs. 2019:
@@ -494,10 +533,10 @@ top_mun
 # Prainha, 
 # Santarém
 
-
 # N.B."in 2009 the mid-state municipalities of Anapu and Pacaja alone accounted
 # for 38% of total production, but by 2019 these municipalities did not even
 # make to top 10."
+
 
 
 # Logging permit 2019
@@ -557,9 +596,9 @@ top_mun
 
 
 
-## Suppl. Fig S1 ------------------------------------------------------------------
+## Suppl. Fig. S2 ------------------------------------------------------------------
 
-# Wrangling for Fig S1
+# Wrangling for Fig. S2
 data_stats_mun_inv <- join_vol_lp_stats_mun |> 
   mutate(LP_SOURCE = case_when(is.na(LP_SOURCE) ~ "UNDETERMINED", 
                                TRUE ~ LP_SOURCE)) |>
@@ -592,7 +631,7 @@ data_stats_mun_inv <- join_vol_lp_stats_mun |>
                                    LP_STATUS %in% c("MISSING ACTIVATION DATE") ~ "MISSING ACTIVATION DATE",
                                    TRUE ~ LP_STATUS)) 
 
-
+# Check on volume
 data_stats_mun_inv |> 
   group_by(STATUS_GROUP1) |> 
   summarise(VOLUME = sum(VOLUME))
@@ -601,25 +640,26 @@ data_stats_mun_inv |>
   group_by(STATUS_GROUP2) |> 
   summarise(VOLUME = sum(VOLUME))
 
+# See that municipality data exists from both joined datasets
 data_stats_mun_inv |> 
   filter(STATUS_GROUP1 == "INVALID") |> 
   group_by(MUNICIPALITY) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
   arrange(desc(VOLUME)) |> 
   adorn_totals() |> as_tibble() 
-# # A tibble: 34 × 2
+# # A tibble: 33 × 2
 # MUNICIPALITY    VOLUME
 # <chr>            <dbl>
-# 1 SANTAREM        32276.
+# 1 SANTAREM        32594.
 # 2 JURUTI          26520.
 # 3 PRAINHA         21433.
 # 4 URUARA          16191.
-# 5 AVEIRO           9810.
-# 6 PLACAS/URUARA    7393.
+# 5 PLACAS          11234.
+# 6 AVEIRO           9810.
 # 7 ANAPU            7089.
 # 8 ANAJAS           5892.
 # 9 IPIXUNA DO PARA  5121.
-# 10 PACAJA           4474.  
+# 10 PACAJA           4474.
 
 data_stats_mun_inv |> 
   filter(STATUS_GROUP1 == "INVALID") |> 
@@ -631,7 +671,7 @@ data_stats_mun_inv |>
 # # A tibble: 34 × 2
 # name_muni       VOLUME
 # <chr>            <dbl>
-# 1 Santarém      32107.
+# 1 Santarém        32107.
 # 2 Juruti          26520.
 # 3 Prainha         24303.
 # 4 Uruará          15075.
@@ -668,10 +708,12 @@ sum((data_stats_mun_inv |> filter(MUNICIPALITY %in% top_mun))$VOLUME)/sum(rw$VOL
 # Clean env. 
 rm(top_mun)
 
+
+
 # Visualizing patterns of production by mun over time
 
-# Supplementary Fig S1a-b
-figS1a <- data_stats_mun |> 
+# Supplementary Fig S2a-b
+figS2a <- data_stats_mun |> 
   group_by(MUNICIPALITY, ID_YEAR) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
   ungroup() |> 
@@ -690,7 +732,7 @@ figS1a <- data_stats_mun |>
 
 
 # Top 10 municipality look
-top_mun_figS1b <-   
+top_mun_figS2b <-   
   data_stats_mun|> 
   group_by(MUNICIPALITY)|>  
   summarise(VOLUME = sum(VOLUME)) |> 
@@ -699,18 +741,18 @@ top_mun_figS1b <-
   top_n(wt = VOLUME, n = 10)|>  #change 10 to 5 to test it
   pull(MUNICIPALITY)
 
-figS1b <- data_stats_mun |> 
+figS2b <- data_stats_mun |> 
   group_by(MUNICIPALITY, ID_YEAR) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
   ungroup() |> 
-  filter(MUNICIPALITY %in% top_mun_figS1b) |> 
+  filter(MUNICIPALITY %in% top_mun_figS2b) |> 
   mutate(MUNICIPALITY = str_to_title(MUNICIPALITY)) |> 
   ggplot() +
   geom_area(aes(x = ID_YEAR, y = VOLUME, group = MUNICIPALITY, 
                 fill = reorder(MUNICIPALITY, VOLUME, FUN = sum, decreasing = T)))+
   scale_fill_manual(name = "Municipality of \n Logging Permit",
                     values = paletteer_c(`"scico::lapaz"`, n=10, direction = -1)) +
-  ylab(expression(paste("Volume (", m^3, ha^-1,")", sep=""))) +
+  ylab(expression(paste("Volume (", m^3, ")", sep=""))) +
   xlab("") +
   labs(title = "Total volume share from largest producing municipalities", 
        tag = "b") +
@@ -722,7 +764,7 @@ figS1b <- data_stats_mun |>
 
 # Where is the volume with invalid/missing illegality risk coming from?
 n <- 16
-figS1c <- data_stats_mun_inv |> 
+figS2c <- data_stats_mun_inv |> 
   filter(STATUS_GROUP1 == "INVALID") |> 
   group_by(MUNICIPALITY, ID_YEAR) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
@@ -743,7 +785,7 @@ figS1c <- data_stats_mun_inv |>
   theme(plot.tag = element_text(face="bold"))
 
 
-top_mun_figS1d <-   
+top_mun_figS2d <-   
   data_stats_mun|> 
   group_by(MUNICIPALITY)|>  
   summarise(VOLUME = sum(VOLUME)) |> 
@@ -753,25 +795,25 @@ top_mun_figS1d <-
   pull(MUNICIPALITY)
 
 
-figS1d_data_inv <- data_stats_mun_inv |> 
+figS2d_data_inv <- data_stats_mun_inv |> 
   filter(STATUS_GROUP1 == "INVALID") |> 
   group_by(MUNICIPALITY, ID_YEAR) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
   ungroup() |> 
-  filter(MUNICIPALITY %in% top_mun_figS1d)
+  filter(MUNICIPALITY %in% top_mun_figS2d)
 
 
 # Expand the data.frame
-figS1d_data <- merge(figS1d_data_inv, 
-                     expand.grid(MUNICIPALITY = unique(figS1d_data_inv$MUNICIPALITY),
-                                 ID_YEAR = unique(figS1d_data_inv$ID_YEAR),
+figS2d_data <- merge(figS2d_data_inv, 
+                     expand.grid(MUNICIPALITY = unique(figS2d_data_inv$MUNICIPALITY),
+                                 ID_YEAR = unique(figS2d_data_inv$ID_YEAR),
                                  stringsAsFactors = F),
                      all.y = T)
 
 # Fill NA values with zeros
-figS1d_data$VOLUME[is.na(figS1d_data$VOLUME)] <- 0
+figS2d_data$VOLUME[is.na(figS2d_data$VOLUME)] <- 0
 
-figS1d <- figS1d_data |> 
+figS2d <- figS2d_data |> 
   mutate(MUNICIPALITY = str_to_title(MUNICIPALITY)) |> 
   ggplot() +
   geom_area(aes(x = ID_YEAR, y = VOLUME, 
@@ -780,7 +822,7 @@ figS1d <- figS1d_data |>
             position = "stack")+
   scale_fill_manual(name = "Municipality of \n Logging Permit",
                     values = paletteer_c(`"scico::lapaz"`, n=10, direction = -1)) +
-  ylab(expression(paste("Volume (", m^3, ha^-1,")", sep=""))) +
+  ylab(expression(paste("Volume (", m^3, ")", sep=""))) +
   xlab("") +
   labs(title = "Total volume share from invalid logging permits by municipality", 
        tag = "d")+
@@ -788,14 +830,19 @@ figS1d <- figS1d_data |>
   theme(plot.tag = element_text(face="bold"))
 
 # Suppl. FigS1
-(figS1a+figS1b)/(figS1c+figS1d)
+(figS2a+figS2b)/(figS2c+figS2d)
 
 # Saving fig
-ggsave(filename = "./results/figS1.jpeg",
+ggsave(filename = "./results/figS2.jpeg",
        width = 16,
        height = 14,
        dpi=700,
        units = "in")
+
+# Saving fig
+ggsave(filename = "./results/figS2.pdf",
+       width = 16,
+       height = 14)
 
 
 
@@ -817,13 +864,15 @@ data_type_lp  |>
   adorn_totals() |> 
   adorn_percentages("col") |> as_tibble()
 
-# 92% AUTEF (state-level), 7% AUTEX-PMFS (national-level), 0.08% AUTEX-Legal Def, 
-# 1.1% Undetermined.
 
-#N.B. "Nearly all ipe production comes from Sustainable Forest Management Plans
-#(PMFS), most of which (92% of volume) from logging permits authorized at
-#state-level, only an insignificant amount (<0.1%) coming from legal
-#deforestation.
+
+# 92% AUTEF (state-level), 7% AUTEX-PMFS (national-level), 0.08% AUTEX-Legal Def, 
+# 1.1% Undetermined 
+
+#N.B. "Nearly all ipê production comes from Sustainable Forest Management Plans
+# (PMFS), most of which (92% of volume) have logging permits authorized at
+# state-level and 7% originated from enterprises licensed under national
+# jurisdiction..."
 
 
 # Figures for share of permit type by year
@@ -872,7 +921,7 @@ data_fig1|> group_by(LP_SOURCE) |> count()
 # 14 NA_NA_AUTEX_NA_NA_NA                                             47
 # 15 NA_NA_NA_AUTEX_ORIGINAL_LP_NA_NA                                  1
 # 16 NA_NA_NA_NA_NA_AUTEF_TYPE_CREDIT                                 11 -- effectively missing 
-# 17 NA                                                               13 -- effectively missing
+# 17 UDETERMINED                                                      13 -- effectively missing
 
 
 data_fig1 |> 
@@ -891,14 +940,16 @@ data_fig1 |>
 # 5 UNDETERMINED                            UNDETERMINED    13 - effectively missing
 # 6 Total                                   -               30
 
-# 29 missing permits
+#29 missing permits as AUTEX ORIGINAL LP is an additional info to main AUTEX number
 
+# N.B. Slight changes may apply to details here as the intention is to minimize
+# missing/understand any data quality issue associated with it.
 
 # Missing permits/Undetermined permits:
-# data_fig1 |> filter(LP_SOURCE %in% 
-#                           c("AUTEF_UPA_NA_NA_NA_NA_AUTEF_TYPE_CREDIT", 
-#                              "AUTEF_UPA_NA_NA_NA_NA_NA", 
-#                              "NA_NA_NA_NA_NA_AUTEF_TYPE_CREDIT", 
+# data_fig1 |> filter(LP_SOURCE %in%
+#                           c("AUTEF_UPA_NA_NA_NA_NA_AUTEF_TYPE_CREDIT",
+#                              "AUTEF_UPA_NA_NA_NA_NA_NA",
+#                              "NA_NA_NA_NA_NA_AUTEF_TYPE_CREDIT",
 #                              "NA_NA_NA_AUTEX_ORIGINAL_LP_NA_NA")) |> view()
 
 
@@ -914,7 +965,7 @@ data_stats_mun_inv |>
 # <chr>          <dbl>
 # 1 AUTEX         0.0694
 # 2 INVALID       0.162 
-# 3 UNDETERMINED  0.0184
+# 3 UNDETERMINED  0.0184 (missing share)
 # 4 VALID         0.751 
 # 5 Total         1 
 
@@ -937,7 +988,7 @@ data_stats_mun_inv |>
 # <chr>           <dbl>
 # 1 AUTEX          68422.
 # 2 INVALID       159451. ~0.16 Mm3
-# 3 UNDETERMINED   18139.
+# 3 UNDETERMINED   18139. (missing share)
 # 4 VALID         740206.
 # 5 Total         986218.
 
@@ -945,7 +996,7 @@ data_stats_mun_inv |>
 # N.B."Nearly all (98%) of total ipe volumes entering the first stage of the
 # supply-chain could be linked to an existing logging permit, rendering the
 # illegality risk from missing permits negligible. When looking at the status of
-# matched permits (Fig. 1b), however, 16% ( 0.16 Mm3) of ipe volume entered the
+# matched permits (Fig. 1b), however, 16% (0.16 Mm3) of ipe volume entered the
 # crediting system on the basis of outright invalid permits; i.e., permits that
 # had been suspended, cancelled, or that were missing an activation date."
 
@@ -966,39 +1017,54 @@ join_vol_lp_data |> filter(is.na(X)) |> view()
 join_vol_lp_data |> filter(is.na(AREA_HA)) |> count() #32
 join_vol_lp_data |> filter(is.na(AREA_HA)) |> view()
 
-# N.B. These have been minimized by further research in prior process of data
-# cleaning and at this stage are mostly part of the missing/undetermined share
-# of permits. Still we keep these in mind through the analysis (e.g. some
-# plotting warnings related to the removal of these obs.)
+# N.B. Missing information across permits have been minimized by further
+# research in prior process of data cleaning and at this stage are mostly part
+# of the missing/undetermined share of permits. Still we keep these in mind
+# through the analysis (e.g. some plotting warnings related to the removal of
+# these obs.)
 
 # Sum by source
 join_vol_lp_data |>  group_by(LP_SOURCE) |> summarise(sum(VOLUME)) |> adorn_totals()
 
+rw_tot <- sum(join_vol_lp_data$VOLUME)
+
 # How much volume UPA polygons cover? 
-join_vol_lp_data |> filter(grepl("UPA", LP_SOURCE)) |> summarise(sum(VOLUME))
-531225*100/986218 #54% only, motivation to obtain full pdfs. 
+join_vol_lp_data |> 
+  filter(grepl("UPA", LP_SOURCE)) |> 
+  summarise(sum(VOLUME)) |>
+  pull()/rw_tot*100
+# 54% only: motivation to obtain full pdfs. 
 
 # How much volume PDF data cover?
-join_vol_lp_data |> filter(grepl("PDF", LP_SOURCE)) |> summarise(sum(VOLUME))
-899658*100/986218# 91.2% (after auto+manual download/search). Figure starts corroborating
-                 # IBAMA 2019 that overwhelming majority ipe comes from AUTEF-PMFS. 
+join_vol_lp_data |> 
+  filter(grepl("PDF", LP_SOURCE)) |> 
+  summarise(sum(VOLUME)) |>
+  pull()/rw_tot*100
+#[1] 90.754683370231
+
+# Update from 91.2% (after auto+manual download/search). Figure starts
+# corroborating IBAMA 2019 that overwhelming majority ipe comes from AUTEF-PMFS.
 
 # How much volume AUTEX data cover?
-join_vol_lp_data |> filter(grepl("AUTEX", LP_SOURCE)) |> summarise(sum(VOLUME))
-76022*100/986218# 7.7%
+join_vol_lp_data |> 
+  filter(grepl("AUTEX", LP_SOURCE)) |> 
+  summarise(sum(VOLUME)) |>
+  pull()/rw_tot*100
+#[1] 8.0392921135894
+# Update from 7.7%
 
 # Between what we can account for with PDFs and data from AUTEX, what share are we missing?
-100-(91.22+7.70) # Only 1.08% cannot be accounted for. 
-
+100-(90.75+8.04) # Only 1.21% cannot be accounted for. 
+# Update from 1.08%. 
 
 # Clean env.
-rm(data_stats_mun, data_stats_mun_inv, top_mun_figS1b, top_mun_figS1d, figS1d_data, 
-   join_vol_lp_stats_mun, vol_by_lp_stats_mun, data_type_lp, figS1d_data_inv, 
-   figS1a, figS1b, figS1c, figS1d)
+rm(data_stats_mun, data_stats_mun_inv, top_mun_figS2b, top_mun_figS2d, figS2d_data, 
+   join_vol_lp_stats_mun, vol_by_lp_stats_mun, data_type_lp, figS2d_data_inv, 
+   figS2a, figS2b, figS2c, figS2d, n)
 
 
 
-# Fig 2 Species yield estimation ----------------------------------------------
+# Fig. 2 Species yield estimation ----------------------------------------------
 
 # Selecting main data for Fig.2
 data_fig2_all <- data_fig1 |> 
@@ -1027,7 +1093,7 @@ data_fig2_valid_and_autex <- data_fig1 |>
 
 ## Checking on outliers (yield, area) ----------------------------------------
 
-#[Data check not immediately reproducible, only for data check]
+#[Data check not immediately reproducible, mostly for documentation purposes]
 
 # What is the range in area for logging permits?
 # data_fig1 |> arrange(AREA_HA) |> view()
@@ -1114,14 +1180,14 @@ data_fig2_valid_and_autex <- data_fig1 |>
 
 
 
-## Fig 2a and Suppl. Fig2Sa and Fig2Sb --------------------------------------
+## Fig 2a and Suppl. FigS3a and FigS3b --------------------------------------
 
 
 ### Replicating Brancalion's RADAM estimates --------------------------------
 
 # This section is based on a replication of Brancalion et al 2018
 # (https://www.science.org/doi/10.1126/sciadv.aat1192) yield estimates. Code is
-# adapted with minimal changes and accessed via Zenodo here:
+# followed original as far as possible, which can be accessed via Zenodo here: 
 # (https://zenodo.org/record/1244107#.WvLg9oiUvIU)
 
 
@@ -1137,7 +1203,7 @@ list.files("./data/raw/radambrasil-brancalion/REPOSITORY_Brancalion et al 2018_S
 
 # Basic information on RADAM plots within Para state
 Para_plots <- readr::read_csv("./data/raw/radambrasil-brancalion/REPOSITORY_Brancalion et al 2018_SA/dados_RADAM_parcelas_Para.csv", 
-                                             locale = locale())
+                              locale = locale())
 # All RADAM data available through the study
 vol_radam <-  foreign::read.dbf("./data/raw/radambrasil-brancalion/REPOSITORY_Brancalion et al 2018_SA/DADOS_RADAM_ALL.dbf")
 
@@ -1255,7 +1321,10 @@ LISTA_FDP.RADAM = list()
 
 # os parametros para o RADAM. Serao retirados a partir de medias de amostras com n.plots
 n.rando = 10000
+# Change here to produce simulations with minimum areas higher than 19ha
 n.plots = ceiling(min(licensas$AREA_HA)) # n.plots vai ser a area da menor autef 
+# n.plots = 66
+# n.plots = 370
 n.plots
 
 
@@ -1275,13 +1344,13 @@ sps.names.plot = paste(
 
 
 for(i in only.sps.used){
-
+  
   #i = 1
   #nomes.ci
   nomes.ci = as.character(valor.sps[i, c("nome_ci1", "nome_ci2", "nome_ci3", "nome_ci4")])
   nomes.ci = as.character(na.omit(as.character(nomes.ci)))
   nomes.ci
-
+  
   #### Radam data -----------------------------------------------------------
   t.radam = data.frame(matrix(NA, ncol = 2, nrow = 0))
   t.radam
@@ -1344,9 +1413,9 @@ for(i in only.sps.used){
     #abastecendo a LISTA
     LISTA_FDP.RADAM[[valor.sps$nome_pop[i]]] = table
     rm(table)
-  
+    
   }else{
-
+    
     LISTA_FDP.RADAM[[valor.sps$nome_pop[i]]] = NA
   }# End ifelse FDP RADAM
   # End RADAM data
@@ -1395,7 +1464,7 @@ for(i in only.sps.used){
   # rm(seq)
   #LISTA_LICENSAS[[valor.sps$nome_pop[i]]] = t.licensas
   
-
+  
   #### Plotting figures --------------------------------------------------------
   
   # Brancalion et al. 2018 original graphic for comparison 
@@ -1424,7 +1493,7 @@ for(i in only.sps.used){
   dev.off()
   
   
-
+  
   #Grafico da distribuicao dos dados do radam e os limiares dos quantis do radam
   jpeg(paste0("./results/HIST_lp_", sps.names.plot[i], ".jpeg"), unit = "in", width = 6, height = 6, res = 300)
   
@@ -1470,12 +1539,13 @@ for(i in only.sps.used){
                              TRUE ~ as.character(NA))) 
   
   
-  figS2b <- ggplot(radam_hist, aes(x = mids, y = counts, fill = group)) +
+  figS3b <- ggplot(radam_hist, aes(x = mids, y = counts, fill = group)) +
     geom_bar(stat="identity") +
-    xlim(0,8) + 
+    coord_cartesian(xlim = c(0, 8), expand = FALSE) +
+    scale_x_continuous(breaks = c(0, 2, 4, 6, 8))+
     ylim(0,10) + 
-    labs(y = "Density(%)", 
-         x = "", 
+    labs(y = "Probability density", 
+         x = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), 
          title = "RADAM Plots", 
          tag = "b") +
     scale_fill_manual(values = c("#2D609B", 
@@ -1486,7 +1556,7 @@ for(i in only.sps.used){
     theme(legend.position = "none", 
           plot.tag = element_text(face="bold"))
   
-
+  
   # Logging permit for main fig and supplementary
   dens_lp <- t.hist.autef$counts|> 
     as_tibble(value = "counts") |> 
@@ -1509,11 +1579,12 @@ for(i in only.sps.used){
     geom_bar(stat="identity") +
     geom_text(aes(x = (0+q90.radam)/2 , y = 6.5, label = "<90%"), angle = 90, color = "#2D609B", size=6) +
     geom_text(aes(x = (q90.radam+q95.radam)/2 , y = 4.5, label = "90-95%"), angle = 90, color = "#CBB94AFF", size=6) +
-    geom_text(aes(x = (q95.radam+q99.radam)/2, y = 4, label = "90-99%"), angle = 90, color = "#A66B20FF", size=6) +
+    geom_text(aes(x = (q95.radam+q99.radam)/2, y = 4, label = "95-99%"), angle = 90, color = "#A66B20FF", size=6) +
     geom_text(aes(x = q99.radam+1 , y = 3.5, label = ">99%"), angle = 90, color = "#843837", size=6) +
-    xlim(0,8) + 
+    coord_cartesian(xlim = c(0, 8), expand = FALSE) +
+    scale_x_continuous(breaks = c(0, 2, 4, 6, 8))+
     ylim(0,10) + 
-    labs(y = "Density(%)", 
+    labs(y = "Probability density", 
          x = "", 
          #title = "Logging permits", 
          tag = "a") +
@@ -1524,21 +1595,22 @@ for(i in only.sps.used){
     theme_minimal()+
     theme(legend.position = "none", 
           plot.tag = element_text(face="bold"))
-
+  
   #Supplementary figure 
-  figS2a <- fig2a + 
+  figS3a <- fig2a + 
     labs(title = "Logging permits", 
+         x = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), 
          tag = "a")
-   
-
+  
+  
   # Consulting palettes
   # paletteer::paletteer_c(`"scico::lapaz"`, n=11, direction = 1)
   # paletteer::paletteer_c(`"scico::bilbao"`, n=11, direction = 1)
   # paletteer::paletteer_c(`"scico::roma"`, n=15, direction = 1)
-
-  # End new plots code (fig2a and figS2a)
   
-
+  # End new plots code (fig2a and figS3a)
+  
+  
   #ABASTECENDO OS OBJETOS:
   #VALOR = c(VALOR, valor.sps$valor[i])
   #NOME.POP = c(NOME.POP, valor.sps$nome_pop[i])
@@ -1564,7 +1636,7 @@ for(i in only.sps.used){
   MEAN.RATIO = c(MEAN.RATIO, mean(t.licensas$YIELD/mean(t.radam$vol)))
   SD.RATIO = c(SD.RATIO, sd(t.licensas$YIELD/mean(t.radam$vol)))
   
-
+  
   
   NOMES.CI = c(NOMES.CI, paste(nomes.ci, collapse = "; "))
   #VOL.TOTAL.LICENSAS = c(VOL.TOTAL.LICENSAS, sum(t.licensas$VOLUM * t.licensas$AREA_HA))
@@ -1578,7 +1650,7 @@ for(i in only.sps.used){
   #    mean.licensas, median.licensas, q90.licensas, q95.licensas, q99.licensas,
   #    limiar, Para_plots, Para_vol_radam, unique.licensas, unique.Radam,
   #    )
-  
+  # 
   print(round(i/nrow(valor.sps)*100, 2))
   
 } # End 
@@ -1615,6 +1687,28 @@ dados = data.frame(#NOME.POP,
   MEAN.RATIO, 
   SD.RATIO)
 
+
+
+# Simulation for Supplementary Fig S4 still manual at this stage. Go through the
+# replication of Brancalion section and change the "n.plots" variable to 66 and
+# 370 for full reproduction. In that scenario also recall certain figures may be
+# overridden. We provide the data objects so you can skip the simulations steps.
+
+# radam_hist_19ha <- radam_hist
+# means_19ha <- means
+# means_19ha |> quantile()
+# dados_19ha <- dados
+
+# radam_hist_66ha <- radam_hist
+# dados_66ha <- dados
+# means_66ha <- means
+# means_66ha |> quantile()
+
+# radam_hist_370ha <- radam_hist
+# dados_370ha <- dados
+# means_370ha <- means
+# means_370ha |> quantile()
+
 rm(NOME.CI_1, MIN.RADAM_raw, MAX.RADAM_raw, MEAN.RADAM, MEDIAN.RADAM,
    Q90.RADAM, Q95.RADAM, Q99.RADAM, N.RADAM, MEAN.LICENSAS, MEDIAN.LICENSAS,
    Q90.LICENSAS, Q95.LICENSAS, Q99.LICENSAS, N.LICENSAS, MEAN.RATIO, SD.RATIO,
@@ -1638,7 +1732,7 @@ radam_fdp <- LISTA_FDP.RADAM |> as.data.frame() |>
 
 
 
-## Fig 2b and Suppl. Fig2Sc and Fig2Sd  --------------------------------------
+## Fig 2b and Suppl. FigS3c and FigS3d  --------------------------------------
 
 # Cumulative sum volume for valid permits
 ncsv_valid <- select(data_fig2_valid, VOLUME, YIELD) |> 
@@ -1661,42 +1755,61 @@ ncsv_autex <- select(data_fig2_autex , VOLUME, YIELD) |>
 colors <- c( "Valid: Expired, Extended" = "#2D609B", 
              "Invalid: Suspended, Cancelled, \n Missing activation date" = "#681C1C", 
              "National Jurisdiction \n (AUTEX)" = "gray50")
-  
+
 fig2b <- ggplot()+
-  annotate("rect",xmin=dados$Q99.RADAM, xmax=8, ymin=0, ymax=1, alpha=0.4, fill="#843837")+
-  annotate("rect",xmin=dados$Q95.RADAM, xmax=dados$Q99.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#A66B20FF")+
-  annotate("rect",xmin=dados$Q90.RADAM, xmax=dados$Q95.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#CBB94AFF")+
-  annotate("rect",xmin=0,xmax=dados$Q90.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#2D609B")+
-  geom_step(data = ncsv_valid, aes(x = YIELD, y = csv, color = "Valid: Expired, Extended"), size = 0.6) +
-  geom_step(data = ncsv_invalid, aes(x = YIELD, y = csv, color = "Invalid: Suspended, Cancelled, \n Missing activation date"), size = 0.6) +
-  geom_step(data = ncsv_autex, aes(x = YIELD, y = csv, color = "National Jurisdiction \n (AUTEX)"), size = 0.6) +
+  annotate("rect",xmin=dados$Q99.RADAM, xmax=8, ymin=0, ymax=1, 
+           alpha=0.4, fill="#843837")+
+  annotate("rect",xmin=dados$Q95.RADAM, xmax=dados$Q99.RADAM,ymin=0,ymax=1, 
+           alpha=0.4, fill="#A66B20FF")+
+  annotate("rect",xmin=dados$Q90.RADAM, xmax=dados$Q95.RADAM,ymin=0,ymax=1, 
+           alpha=0.4, fill="#CBB94AFF")+
+  annotate("rect",xmin=0,xmax=dados$Q90.RADAM,ymin=0,ymax=1, 
+           alpha=0.4, fill="#2D609B")+
+  geom_step(data = ncsv_valid, aes(x = YIELD, y = csv, 
+                                   color = "Valid: Expired, Extended"), size = 0.6) +
+  geom_step(data = ncsv_invalid, aes(x = YIELD, y = csv, 
+                                     color = "Invalid: Suspended, Cancelled, \n Missing activation date"), size = 0.6) +
+  geom_step(data = ncsv_autex, aes(x = YIELD, y = csv, 
+                                   color = "National Jurisdiction \n (AUTEX)"), size = 0.6) +
   labs(tag = "b", 
        x = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), 
-       y = "Cumulative Volume Sum (m³)",
-       color = "Status of \n Logging Permits") +
-  scale_color_manual(values = colors) +
-  xlim(0, 8) +
+       y = "Cumulative share of volume (%)") +
+  scale_color_manual(name = "Status of \n Logging Permits", 
+                     values = colors) +
+  coord_cartesian(xlim = c(0, 8), expand = FALSE) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8))+
+  scale_y_continuous(labels = c("0", "25", "50", "75", "100")) +
+  guides(col = guide_legend(reverse = TRUE))+
   theme_minimal() +
   theme(plot.title.position = "plot", 
         plot.tag = element_text(face="bold"),
-        legend.position = c(0.75, 0.75), 
+        legend.position = c(0.8, 0.75), 
         legend.background = element_rect(fill="white",
                                          linewidth=0.5, 
                                          linetype="solid",
                                          colour ="white"))
-  
-  
+
+
 fig2a/fig2b
 
+
+#Saving figs
 ggsave(filename = "./results/fig2ab.jpeg",
        width = 8,
        height = 10,
        dpi=700,
        units = "in")
 
+ggsave(filename = "./results/fig2ab.pdf",
+       width = 8,
+       height = 10,
+       dpi=700,
+       units = "in")
 
-# Supplementary figS2c is nearly the same as fig2b
-figS2c <- ggplot()+
+
+
+# Supplementary figS3c is nearly the same as fig2b
+figS3c <- ggplot()+
   annotate("rect",xmin=dados$Q99.RADAM, xmax=8, ymin=0, ymax=1, alpha=0.4, fill="#843837")+
   annotate("rect",xmin=dados$Q95.RADAM, xmax=dados$Q99.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#A66B20FF")+
   annotate("rect",xmin=dados$Q90.RADAM, xmax=dados$Q95.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#CBB94AFF")+
@@ -1706,18 +1819,23 @@ figS2c <- ggplot()+
   geom_step(data = ncsv_autex, aes(x = YIELD, y = csv, color = "National Jurisdiction \n (AUTEX)"), size = 0.6) +
   labs(tag = "c", 
        x = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), 
-       y = "Cumulative Sum, Volume (m³)",
+       y = "Cumulative share of volume (%)",
        title = "Cumulative Sum, Volume",
        color = "Status of \n Logging Permits") +
   scale_color_manual(values = colors) +
-  xlim(0, 8) +
+  coord_cartesian(xlim = c(0, 8), expand = FALSE) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8))+
+  scale_y_continuous(labels = c("0", "25", "50", "75", "100")) +
+  #xlim(0, 8) +
+  guides(col = guide_legend(reverse = TRUE))+
   theme_minimal() +
   theme(plot.tag = element_text(face="bold"),
-        legend.position = c(0.75, 0.75), 
+        legend.position = c(0.8, 0.75), 
         legend.background = element_rect(fill="white",
                                          size=0.5, 
                                          linetype="solid",
                                          colour ="white"))
+
 
 
 
@@ -1736,44 +1854,58 @@ ncsa_invalid <- select(data_fig2_invalid, AREA_HA, YIELD) |>
 ncsa_autex <- select(data_fig2_autex , AREA_HA, YIELD) |> 
   arrange(YIELD) |> 
   mutate(csv = 1-cumsum(AREA_HA)/sum(AREA_HA))
-  
-  
-  
-figS2d <- ggplot()+
+
+
+
+figS3d <- ggplot()+
   annotate("rect",xmin=dados$Q99.RADAM, xmax=8, ymin=0, ymax=1, alpha=0.4, fill="#843837")+
-    annotate("rect",xmin=dados$Q95.RADAM, xmax=dados$Q99.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#A66B20FF")+
-    annotate("rect",xmin=dados$Q90.RADAM, xmax=dados$Q95.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#CBB94AFF")+
-    annotate("rect",xmin=0,xmax=dados$Q90.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#2D609B")+
-    geom_step(data = ncsa_valid, aes(x = YIELD, y = csv, color = "Valid: Expired, Extended"), size = 0.6) +
-    geom_step(data = ncsa_invalid, aes(x = YIELD, y = csv, color = "Invalid: Suspended, Cancelled, \n Missing activation date"), size = 0.6) +
-    geom_step(data = ncsa_autex, aes(x = YIELD, y = csv, color = "National Jurisdiction \n (AUTEX)"), size = 0.6) +
-       labs(tag = "d", 
-         x = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), 
-         y = "Cumulative Sum, Area (ha)",
-         title = "Cumulative Sum, Area",
-         color = "Status of \n Logging Permits") +
-    scale_color_manual(values = colors) +
-    xlim(0, 8) +
-    theme_minimal() +
-    theme(plot.tag = element_text(face="bold"),
-          legend.position = c(0.75, 0.75), 
-          legend.background = element_rect(fill="white",
-                                           #alpha = 0.8,
-                                           size=0.5, 
-                                           linetype="solid",
-                                           colour ="white"))
+  annotate("rect",xmin=dados$Q95.RADAM, xmax=dados$Q99.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#A66B20FF")+
+  annotate("rect",xmin=dados$Q90.RADAM, xmax=dados$Q95.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#CBB94AFF")+
+  annotate("rect",xmin=0,xmax=dados$Q90.RADAM,ymin=0,ymax=1, alpha=0.4, fill="#2D609B")+
+  geom_step(data = ncsa_valid, aes(x = YIELD, y = csv, color = "Valid: Expired, Extended"), size = 0.6) +
+  geom_step(data = ncsa_invalid, aes(x = YIELD, y = csv, color = "Invalid: Suspended, Cancelled, \n Missing activation date"), size = 0.6) +
+  geom_step(data = ncsa_autex, aes(x = YIELD, y = csv, color = "National Jurisdiction \n (AUTEX)"), size = 0.6) +
+  labs(tag = "d", 
+       x = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), 
+       y = "Cumulative share of area (%)",
+       title = "Cumulative Sum, Area",
+       color = "Status of \n Logging Permits") +
+  scale_color_manual(values = colors) +
+  coord_cartesian(xlim = c(0, 8), expand = FALSE) +
+  scale_x_continuous(breaks = c(0, 2, 4, 6, 8))+
+  scale_y_continuous(labels = c("0", "25", "50", "75", "100")) +
+  guides(col = guide_legend(reverse = TRUE))+
+  # xlim(0, 8) +
+  theme_minimal() +
+  theme(plot.tag = element_text(face="bold"),
+        legend.position = c(0.8, 0.75), 
+        legend.background = element_rect(fill="white",
+                                         #alpha = 0.8,
+                                         size=0.5, 
+                                         linetype="solid",
+                                         colour ="white"))
 
 
-(figS2a+figS2b)/(figS2c+figS2d)
+(figS3a+figS3b)/(figS3c+figS3d)
 
-ggsave(filename = "./results/figS2.jpeg",
+#Saving figs
+ggsave(filename = "./results/figS3.jpeg",
        width = 14,
        height = 10,
        dpi=700,
        units = "in")
 
-rm(fig2a, fig2b, figS2a, figS2b, figS2c, figS2d, colors, mids_lp, mids_radam, 
+ggsave(filename = "./results/figS3.pdf",
+       width = 14,
+       height = 10,
+       dpi=700,
+       units = "in")
+
+
+rm(fig2a, fig2b, figS3a, figS3b, figS3c, figS3d, colors, mids_lp, mids_radam, 
    ncsv_autex, ncsv_valid, ncsv_invalid,ncsa_autex, ncsa_valid, ncsa_invalid)
+
+
 
 # Supporting Stats (Part 2) -----------------------------------------------
 
@@ -1789,7 +1921,7 @@ dados$MEAN.LICENSAS
 # data_fig2_valid |> 
 #   summarise(mean(YIELD))
 #mean.licensas
-sd.licensas #TODO: double check whether to remove sd from manuscript
+sd.licensas 
 # SD stats only for valid permits
 data_fig2_valid |> 
   summarise(sd(YIELD))
@@ -1803,9 +1935,8 @@ data_fig2_valid |>
 # Average yield for radam
 dados$MEAN.RADAM
 #mean.radam
-sd.radam #TODO: double check whether to remove sd from manuscript
 # N.B. ...."This can be contrasted to field observations from Para, where yields
-# average 0.7 m3.ha−1 (sd:0.55 m3.ha−1)"
+# average 0.7 m3.ha−1". 
 
 
 
@@ -1885,7 +2016,7 @@ data_fig2_valid |>
 
 
 # Clean env.
-rm(t.radam, t.licensas, sd.radam, sd.licensas,
+rm(dados, t.radam, t.licensas, sd.radam, sd.licensas,
    mean.radam, median.radam, q90.radam, q95.radam, q99.radam,
    mean.licensas, median.licensas, q90.licensas, q95.licensas, q99.licensas,
    limiar, Para_plots, Para_vol_radam, unique.licensas, unique.Radam)
@@ -1899,9 +2030,202 @@ rm(t.hist.autef, t.hist.radam, col.autef, col.radam, range.autef, range.radam,
    x, y, n, y.max)
 
 
+## Suppl. Fig. S4 Sensitivity RADAM yield distribution simulation ------------
+
+### Suppl. Fig. S4a -----------------------------------------------------------------
+# Quartile-based simulation check 
+
+# What areas to consider? 
+# All areas
+summary(data_fig2_all$AREA_HA)
+# Min.         1st Qu.          Median            Mean         3rd Qu.            Max. 
+# 18.7537000      66.4294250     370.0337000    3561.0098098    1003.4181000 1289338.1614000 
+
+# Splitting the dataset into quartiles to discuss area bias
+summary(data_fig2_all$AREA_HA) |> tibble() |> pull("summary(data_fig2_all$AREA_HA)")
 
 
-## Suppl. Fig. S3 ------------------------------------------------------------
+# Defining categories according to area quartiles
+data_fig2_all$cat_var <- cut(data_fig2_all$AREA_HA,
+                             breaks = c(18,  66, 370, 1003, 13000000),
+                             labels = c('Q1(19-]', 'Q2(66-]', 'Q3(370-]', 'Q4(1003-1.3M)'))
+
+# Applying lower boundaries to simulations 19, 66, 370ha
+data_suppl_radam1 <- data_fig2_all |> 
+  mutate(class = case_when(cat_var =='Q1(19-]' & YIELD<dados_19ha$Q90.RADAM ~ "<90%", 
+                           cat_var =='Q1(19-]' & YIELD<dados_19ha$Q95.RADAM ~ "90-95%",
+                           cat_var =='Q1(19-]' & YIELD<dados_19ha$Q99.RADAM ~ "95-99%", 
+                           cat_var =='Q1(19-]' & YIELD>dados_19ha$Q99.RADAM ~ ">99%",
+                           cat_var =='Q2(66-]' & YIELD<dados_66ha$Q90.RADAM ~ "<90%", 
+                           cat_var =='Q2(66-]' & YIELD<dados_66ha$Q95.RADAM ~ "90-95%",
+                           cat_var =='Q2(66-]' & YIELD<dados_66ha$Q99.RADAM ~ "95-99%", 
+                           cat_var =='Q2(66-]' & YIELD>dados_66ha$Q99.RADAM ~ ">99%", 
+                           cat_var =='Q3(370-]' & YIELD<dados_370ha$Q90.RADAM ~ "<90%", 
+                           cat_var =='Q3(370-]' & YIELD<dados_370ha$Q95.RADAM ~ "90-95%",
+                           cat_var =='Q3(370-]' & YIELD<dados_370ha$Q99.RADAM ~ "95-99%", 
+                           cat_var =='Q3(370-]' & YIELD>dados_370ha$Q99.RADAM ~ ">99%",
+                           cat_var =='Q4(1003-1.3M)' & YIELD<dados_19ha$MEAN.RADAM ~ "<90%",
+                           cat_var =='Q4(1003-1.3M)' & YIELD>dados_19ha$MEAN.RADAM ~ ">99%",
+                           TRUE~as.character(NA)))
+
+
+
+# Inset volume table
+# All permits 
+vol_inset1 <- data_fig2_all |> 
+  group_by("Quantile (ha)" = cat_var) |> 
+  summarise("Volume (m³)" = sum(VOLUME)) |> 
+  adorn_rounding()
+#Valid only
+vol_inset2 <- data_fig2_all |> 
+  filter(STATUS_GROUP1=="VALID") |> 
+  group_by("Quantile (ha)" = cat_var) |> 
+  summarise("Volume (m³)" = sum(VOLUME)) |> 
+  adorn_rounding() 
+# Inset for valid only since risk applies to this share
+vol_inset <- vol_inset2 
+
+# Remove top 10 outliers for yield
+n <- data_suppl_radam1 |> 
+  select(YIELD) |> 
+  slice_max(YIELD, n = 10) |> 
+  slice_min(YIELD, n = 1) |> pull()
+
+p1 <- data_suppl_radam1 |> 
+  filter(YIELD < n, 
+         #STATUS_GROUP1 == "VALID", 
+         !is.na(cat_var)) |> 
+  ggplot(aes(x = cat_var, y=YIELD))+
+  geom_jitter(aes(colour=class), size=0.9, alpha=0.6, position = position_jitter(width = .2)) +
+  scale_colour_manual(breaks =  c("<90%",  "90-95%",  "95-99%", ">99%"),
+                      values = c("#2D609B",  "#CBB94AFF",  "#A66B20FF", "#843837"))+
+  annotate("rect", xmin=c(0.9,0.9), xmax=c(1.1, 1.1),
+           ymin=c(quantile(means_19ha, 0.25), quantile(means_19ha, 0.25)) ,
+           ymax=c(quantile(means_19ha, 0.75), quantile(means_19ha, 0.75)),
+           linewidth = 1, alpha=0.2, color="black")+
+  annotate("segment", x = 0.9, xend = 1.1, 
+           y = median(means_19ha), yend = median(means_19ha), linewidth = 1)+
+  annotate("segment", x = 1.9, xend = 2.1, 
+           y = median(means_66ha), yend = median(means_66ha), linewidth = 1)+
+  annotate("segment", x = 2.9, xend = 3.1, 
+           y = median(means_370ha), yend = median(means_370ha), linewidth = 1)+
+  annotate("rect", xmin=c(1.9,1.9), xmax=c(2.1, 2.1),
+           ymin=c(quantile(means_66ha, 0.25), quantile(means_66ha, 0.25)) ,
+           ymax=c(quantile(means_66ha, 0.75), quantile(means_66ha, 0.75)),
+           linewidth = 1, alpha=0.2, color="black")+
+  annotate("rect", xmin=c(2.9,2.9), xmax=c(3.1, 3.1),
+           ymin=c(quantile(means_370ha, 0.25), quantile(means_370ha, 0.25)) ,
+           ymax=c(quantile(means_370ha, 0.75), quantile(means_370ha, 0.75)),
+           linewidth = 1, alpha=0.2, color="black")+
+  annotate("pointrange", 
+           x = 1, # Positioning on first category 
+           y = median(means_19ha), 
+           ymin = min(means_19ha), 
+           ymax = max(means_19ha), 
+           colour = "black", size = 0.1, linewidth = 1, alpha=0.9, shape= ".") + # 17, 19, 25
+  annotate("pointrange", 
+           x = 2, # Positioning on first category 
+           y = median(means_66ha), 
+           ymin = min(means_66ha), 
+           ymax = max(means_66ha), 
+           colour = "black", size = 0.1, linewidth = 1, alpha=0.9, shape=".") +
+  annotate("pointrange", 
+           x = 3, # Positioning on first category 
+           y = median(means_370ha), 
+           ymin = min(means_370ha), 
+           ymax = max(means_370ha), 
+           colour = "black", size = 0.1, linewidth = 1, alpha=0.9, shape=".") +
+  ggpp::annotate(geom = "table", x = 4.5, y = 8.5, label = list(vol_inset)) +
+  geom_hline(yintercept = dados_19ha$MEAN.RADAM, linetype= "dashed", color = "black") +
+  geom_hline(yintercept = dados_19ha$Q99.RADAM, linetype= "dashed", color = "black") +
+  scale_y_continuous(breaks = c(0, 0.7, 2, 2.5, 4, 6, 8))+
+  labs(y = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), x = "", 
+       colour = "RADAM yield \n baseline",
+       tag = "a")+
+  theme(plot.tag = element_text(face="bold"))
+
+#theme(legend.position="bottom")
+
+
+# Check figure
+figS4a <- p1
+
+
+
+### Suppl. Fig. S4b/S4c -------------------------------------------------------
+
+# Trend yield over area 
+
+# What is the share of valid? Baseline for area and volume  
+data_fig2_all |> 
+  filter(STATUS_GROUP1 == "VALID") |> 
+  summarise(AREA_SUM = sum(AREA_HA), VOL_SUM= sum(VOLUME))
+
+cnt_valid <- data_fig2_all |> 
+  filter(STATUS_GROUP1 == "VALID") |> count()
+
+
+figS4b <- data_fig2_all |> 
+  filter(AREA_HA < 100, YIELD < n, STATUS_GROUP1 == "VALID") |> 
+  ggplot(aes(x = AREA_HA, y = YIELD)) +
+  geom_point() +
+  stat_poly_eq() +
+  geom_smooth(method="lm", se=FALSE)+
+  labs(y = expression(paste("Yield (", m^3, ha^-1, ")", sep="")), x = "Area (ha)", 
+       tag = "b") +
+  coord_cartesian(ylim = c(0, 8)) +
+  theme(plot.tag = element_text(face="bold"))
+
+data_fig2_all |> 
+  filter(AREA_HA < 100, YIELD < n, STATUS_GROUP1 == "VALID") |> 
+  count()
+
+
+
+figS4c <- data_fig2_all |> 
+  filter(AREA_HA < 1000, AREA_HA > 100, YIELD < n, STATUS_GROUP1 == "VALID") |> 
+  ggplot(aes(x = AREA_HA, y = YIELD)) +
+  geom_point() +
+  stat_poly_eq() +
+  geom_smooth(method="lm", se=FALSE)+ 
+  labs(y = "", x = "Area (ha)", tag = "c")+
+  coord_cartesian(ylim = c(0, 8), 
+                  xlim = c(100, 1000))+
+  scale_x_continuous(breaks = c(100, 250, 500, 750, 1000))+
+  theme(plot.tag = element_text(face="bold"))
+
+
+data_fig2_all |> 
+  filter(AREA_HA < 1000, AREA_HA > 100, YIELD < n, STATUS_GROUP1 == "VALID") |> 
+  count()
+
+
+figS4 <- figS4a/(figS4b|figS4c)
+
+# Saving figs
+#jpeg
+jpeg("./results/figS4.jpeg",
+     width = 10, height = 12, units = "in",
+     bg = "white", res = 700)
+print(figS4)
+dev.off()
+
+#pdf
+ggsave(filename = "./results/figS4.pdf",
+       width = 10,
+       height = 12,
+       dpi=700,
+       units = "in")
+
+# Clean env. 
+rm(vol_inset, vol_inset1, vol_inset2, vol_inset3, radam_hist_19ha, radam_hist_66ha, 
+   radam_hist_370ha, means_19ha, means_66ha, means_370ha, dados_19ha, dados_66ha, 
+   dados_370ha)
+
+rm(figS4, figS4a, figS4b, figS4c)
+
+
+## Suppl. Fig. S5 ------------------------------------------------------------
 
 # Location of overestimated volume 
 loc_overst <- data_fig2_valid_and_autex |> 
@@ -1968,32 +2292,32 @@ p3 <- loc_overst |>
   theme_minimal() +
   theme(axis.text.x = element_blank())
 
-
-figS3a <- (p3+p2) + 
+figS5a <- (p3+p2) + 
   plot_layout(widths = c(1, 3), 
               guides = 'collect')
 
-
-figS3 <- (p1|figS3a) +
+figS5 <- (p1|figS5a) +
   plot_annotation(tag_levels = list(c('a', 'b', ''))) &
   theme(plot.tag = element_text(face = 'bold'))
 
-# # Saving fig2b 
-# ggsave(filename = "figS3.jpeg",
-#        dpi=700,
-#        # height = 7.38,
-#        # width = 11.4,
-#        units = "in")
 
-# Saving fig1 
-jpeg("./results/figS3.jpeg",
+# Saving figs
+#jpeg
+jpeg("./results/figS5.jpeg",
      width = 20, height = 10, units = "in",
      bg = "white", res = 700)
-print(figS3)
+print(figS5)
 dev.off()
 
+#pdf
+ggsave(filename = "./results/figS5.pdf",
+       width = 20,
+       height = 10,
+       dpi=700,
+       units = "in")
+
 # Clean env. 
-rm(figS3, figS3a, p1, p2, p3)
+rm(figS5, figS5a, p1, p2, p3)
 
 
 # Municipality by overstated yields 
@@ -2021,14 +2345,14 @@ sum((loc_overst_mun |> filter(MUNICIPALITY %in% top_mun))$VOLUME)/sum(loc_overst
 
 sum((loc_overst_mun |> filter(MUNICIPALITY %in% top_mun))$VOLUME)
 
-#N.B. ..."Juruti and Santare  ́m alone accounts for 31% of the overstated share
+#N.B. ..."Juruti and Santarém alone accounts for 31% of the overstated share
 #(0.11 Mm3; 11% of the entire roundwood production)". 
 
 # Clean env.
 rm(loc_overst, loc_overst_mun, mun_overst, p1,p2,p3, top_mun)
 
 
-## Suppl. Fig. S4 --------------------------------------------------------
+## Suppl. Fig. S7 --------------------------------------------------------
 
 # Setting up display order for all status categories
 levels(data_fig2_all$STATUS_GROUP3) <- c("Expired",
@@ -2042,11 +2366,16 @@ levels(data_fig2_all$STATUS_GROUP3) <- c("Expired",
                                          "Cancelled (illegality)",
                                          "National jurisdiction (AUTEX)")
 
+
 #Yield
-figS4a <- data_fig2_all |> 
-  #filter(YIELD < 10) |> 
-  ggplot(aes(fct_rev(STATUS_GROUP3), YIELD))+
-  geom_boxplot(outlier.alpha = 0.7) +
+count_labels_a <- data_fig2_all |> 
+  group_by(STATUS_GROUP3) |> 
+  mutate(STATUS_GROUP3 = fct_rev(STATUS_GROUP3)) |> 
+  summarise(textlabel = paste("n:", format(n(), big.mark = " "))) 
+
+figS7a <- data_fig2_all |> 
+  ggplot(aes(x = STATUS_GROUP3, y = YIELD))+
+  geom_boxplot() +
   geom_jitter(width = 0.2, alpha = 0.6, aes(color=STATUS_GROUP3))+
   scale_color_manual(values = c("#2D609B","#3C79A5","#A67A60","#A16959","#9C5651", 
                                 "#8F4342", "#792C2C","#631717","#4D0001","grey50")) +
@@ -2057,16 +2386,26 @@ figS4a <- data_fig2_all |>
     ")", sep="")))+
   labs(title = "Yield distribution by status of logging permit ", 
        tag = "a")+
+  scale_x_discrete(labels = paste(count_labels_a$STATUS_GROUP3," (", count_labels_a$textlabel,")",sep=""), 
+                   limits=rev) +
   coord_flip() +
   theme(legend.position="none",
-       #plot.title.position = "plot",
+        #plot.title.position = "plot",
         plot.tag = element_text(face="bold"))
 
 
-#Area
-figS4b <- data_fig2_all |> 
-  #filter(YIELD < 10) |> 
-  ggplot(aes(fct_rev(STATUS_GROUP3), VOLUME))+
+
+
+
+# Volume 
+count_labels_b <- data_fig2_all |> 
+  group_by(STATUS_GROUP3) |> 
+  mutate(STATUS_GROUP3 = fct_rev(STATUS_GROUP3)) |> 
+  summarise(textlabel = paste("n:", format(n(), big.mark = " "))) 
+
+
+figS7b <- data_fig2_all |> 
+  ggplot(aes(STATUS_GROUP3, VOLUME))+
   geom_boxplot(outlier.alpha = 0.7) +
   geom_jitter(width = 0.2, alpha = 0.6, aes(color=STATUS_GROUP3))+
   scale_color_manual(values = c("#2D609B","#3C79A5","#A67A60","#A16959","#9C5651", 
@@ -2078,16 +2417,23 @@ figS4b <- data_fig2_all |>
   xlab("")+
   labs(title = "Volume distribution by status of logging permit ", 
        tag = "b")+
+  scale_x_discrete(labels = paste(count_labels_b$STATUS_GROUP3," (", count_labels_b$textlabel,")",sep=""), 
+                   limits=rev) +
   coord_flip() +
   theme(legend.position="none",
         #plot.title.position = "plot",
         plot.tag = element_text(face="bold"))
 
-#Volume 
-figS4c <- data_fig2_all |> 
+# Area 
+count_labels_c <- data_fig2_all |> 
   filter(AREA_HA < 10000) |> 
-  #filter(YIELD < 10) |> 
-  ggplot(aes(fct_rev(STATUS_GROUP3), AREA_HA))+
+  group_by(STATUS_GROUP3) |> 
+  mutate(STATUS_GROUP3 = fct_rev(STATUS_GROUP3)) |> 
+  summarise(textlabel = paste("n:", format(n(), big.mark = " "))) 
+
+figS7c <- data_fig2_all |> 
+  filter(AREA_HA < 10000) |> 
+  ggplot(aes(STATUS_GROUP3, AREA_HA))+
   geom_boxplot(outlier.alpha = 0.7) +
   geom_jitter(width = 0.2, alpha = 0.6, aes(color=STATUS_GROUP3))+
   scale_color_manual(values = c("#2D609B","#3C79A5","#A67A60","#A16959","#9C5651", 
@@ -2096,31 +2442,43 @@ figS4c <- data_fig2_all |>
   xlab("")+
   labs(title = "Area distribution by status of logging permit", 
        tag = "c")+
+  scale_x_discrete(labels = paste(count_labels_c$STATUS_GROUP3," (", count_labels_c$textlabel,")",sep=""), 
+                   limits=rev) +
   coord_flip() +
   theme(legend.position="none",
         #plot.title.position = "plot",
         plot.tag = element_text(face="bold"))
 
 
-figS4 <- figS4a/figS4b/figS4c
+figS7 <- figS7a/figS7b/figS7c
 
-# Saving fig1 
-jpeg("./results/figS4.jpeg", 
+# Saving figs
+# jpeg
+jpeg("./results/figS7.jpeg", 
      width = 12, height = 15, units = "in", 
      bg = "white", res = 700)
-print(figS4)
+print(figS7)
 dev.off()
 
+#pdf
+ggsave(filename = "./results/figS7.pdf",
+       width = 12,
+       height = 15,
+       dpi=700,
+       units = "in")
 
 # Clean env. 
-rm(figS4, figS4a, figS4b, figS4c)
+rm(figS7, figS7a, figS7b, figS7c)
 
 rm(data_fig2_valid, data_fig2_invalid, data_fig2_autex, data_fig2_all, 
-   data_fig2_valid_and_autex, dados)
+   data_fig2_valid_and_autex)
 
 
 
 ## Methods/Supplementary text ----------------------------------------------
+
+#[Not immediately reproducible]
+#TODO: re-add scientific name for stats 
 
 # What species do we include and what is the volume breakdown?
 rw |> group_by(SCIENTIFIC_NAME) |> 
@@ -2155,7 +2513,7 @@ rw |> mutate(SP_GROUP = case_when(SCIENTIFIC_NAME %in% c("TABEBUIA SERRATIFOLIA 
                                   SCIENTIFIC_NAME %in% c("TABEBUIA SP.", 
                                                          "TABEBUIA", 
                                                          "TABEBUIA SP") ~ "TABEBUIA SP", 
-                                                          TRUE ~ "OTHERS")) |> 
+                                  TRUE ~ "OTHERS")) |> 
   group_by(SP_GROUP) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
   adorn_totals() |> 
@@ -2171,18 +2529,18 @@ rw |> mutate(SP_GROUP = case_when(SCIENTIFIC_NAME %in% c("TABEBUIA SERRATIFOLIA 
 
 rw |> filter(ID_YEAR == 2019)  |> 
   mutate(SP_GROUP = case_when(SCIENTIFIC_NAME %in% c("TABEBUIA SERRATIFOLIA (VAHL) NICHOLS.", 
-                                                         "HANDROANTHUSSERRATIFOLIUS", 
-                                                         "HANDROANTHUS SERRATIFOLIUS", 
-                                                         "TABEBUIASERRATIFOLIA",
-                                                         "TABEBUIA SERRATIFOLIA") ~ "HANDROANTHUS SERRATIFOLIUS",
-                                  SCIENTIFIC_NAME %in% c("TABEBUIA IMPETIGINOSA (MART. EX DC.) STANDL.",
-                                                         "TABEBUIAIMPETIGINOSA", 
-                                                         "HANDROANTHUS IMPETIGINOSUM", 
-                                                         "HANDROANTHUSIMPETIGINOSUM") ~ "HANDROANTHUS IMPETIGINOSUM", 
-                                  SCIENTIFIC_NAME %in% c("TABEBUIA SP.", 
-                                                         "TABEBUIA", 
-                                                         "TABEBUIA SP") ~ "TABEBUIA SP", 
-                                  TRUE ~ "OTHERS")) |> 
+                                                     "HANDROANTHUSSERRATIFOLIUS", 
+                                                     "HANDROANTHUS SERRATIFOLIUS", 
+                                                     "TABEBUIASERRATIFOLIA",
+                                                     "TABEBUIA SERRATIFOLIA") ~ "HANDROANTHUS SERRATIFOLIUS",
+                              SCIENTIFIC_NAME %in% c("TABEBUIA IMPETIGINOSA (MART. EX DC.) STANDL.",
+                                                     "TABEBUIAIMPETIGINOSA", 
+                                                     "HANDROANTHUS IMPETIGINOSUM", 
+                                                     "HANDROANTHUSIMPETIGINOSUM") ~ "HANDROANTHUS IMPETIGINOSUM", 
+                              SCIENTIFIC_NAME %in% c("TABEBUIA SP.", 
+                                                     "TABEBUIA", 
+                                                     "TABEBUIA SP") ~ "TABEBUIA SP", 
+                              TRUE ~ "OTHERS")) |> 
   group_by(SP_GROUP) |> 
   summarise(VOLUME = sum(VOLUME)) |> 
   adorn_totals() |> 
@@ -2191,7 +2549,7 @@ rw |> filter(ID_YEAR == 2019)  |>
 # N.B. Figures here only relate to production/roundwood. More species details on
 # products code.
 
-#Clen env.
+#Clean env.
 rm(data_fig2_all, data_fig2_autex, data_fig2_invalid, data_fig2_valid, 
    data_fig2_valid_and_autex)
 
@@ -2229,10 +2587,6 @@ p_sp_lp <- p_sp_lp |>
                             TRUE ~ as.character(NA))) |>
   mutate(LP_REF = if_else(is.na(LP_REF), PERMIT_NUMBER, LP_REF))
 
-# TODO: Under development; Potential data sharing restriction on individuals vs.
-# enterprise registry. Confirm whether only CPFs need anonymization from
-# SISFLORA-PA data  
-
 p_sp_lp <- rw
 
 
@@ -2250,14 +2604,14 @@ data_production_status <- join_p_lp_data |>
                                                     "EXTENDED", 
                                                     "EXTENDED_CANCELLED SUSPENSION") ~ "VALID", 
                                    LP_STATUS %in% c("SUSPENDED", 
-                                                     "CANCELLED", 
-                                                     "CANCELLED_OTHERS", 
-                                                     "CANCELLED_PERMIT SUBSTITUTION", 
-                                                     "CANCELLED_ELABORATION FAILURE", 
-                                                     "CANCELLED_NONCOMPLIENCE WITH CONDITIONS", 
-                                                     "CANCELLED_ILLEGALITY", 
-                                                     "MISSING ACTIVATION DATE", 
-                                                     "UNDETERMINED") ~ "INVALID_MISSING", 
+                                                    "CANCELLED", 
+                                                    "CANCELLED_OTHERS", 
+                                                    "CANCELLED_PERMIT SUBSTITUTION", 
+                                                    "CANCELLED_ELABORATION FAILURE", 
+                                                    "CANCELLED_NONCOMPLIENCE WITH CONDITIONS", 
+                                                    "CANCELLED_ILLEGALITY", 
+                                                    "MISSING ACTIVATION DATE", 
+                                                    "UNDETERMINED") ~ "INVALID_MISSING", 
                                    LP_STATUS %in% c("EMITIDA OFERTA", 
                                                     "ESTORNADO ITEM") ~ "AUTEX", 
                                    TRUE ~ "INVALID_MISSING")) 
@@ -2337,7 +2691,7 @@ share_mun <- share_status |>
 
 
 ## Fig 3a Scatterpie -------------------------------------------------------
-  
+
 # Check out centroid of municipalities for annotation
 mun_centroid |> filter(name_muni == "Santarém")
 mun_centroid |> filter(name_muni == "Juruti")
@@ -2430,31 +2784,9 @@ fig3a <- ggplot()  +
         #legend.position = c(0.85, 0.85)
         plot.tag = element_text(face="bold")) 
 
-# Saving single fig3a plot 
-# ggsave(filename = "./results/fig3a.png",
-#        width = 12,
-#        height = 12,
-#        device='png',
-#        dpi=700,
-#        units = "in")
-
-# # Check out mapping features
-# tmap_mode("view")
-# mun_pa <- mun |> 
-#   filter(code_state == "15")
-# tm_shape(states_pa) +
-#   tm_basemap("Stamen.TonerLite") +
-#   tm_polygons(alpha = 0,  border.col = "Black") +
-#   tm_shape(mun_pa) +
-#   tm_basemap("Stamen.TonerLite") +
-#   tm_polygons(alpha = 0,  border.col = "Grey")
-
 
 
 ## Pre-processing io and env. ext. strings -----------------------------------
-
-# TODO: Code efficiency improvement; at this moment this is a quite cumbersome
-# way to put flows together. This section is currently being improved. 
 
 # Pre-process strings for full io
 start_time <- Sys.time()
@@ -2644,33 +2976,46 @@ fig3b <- ggplot(io_alluv_df5,
                                "#518DA6", #blue "#2D609B", "#843837"
                                "#A37824", # yellow/brown #F2CD3B "#E4D7BD", "#CFB889", "#B99956", "#A37824"
                                "grey70"))+
-
+  
   labs(tag = "b") +
   theme_void() + 
   theme(legend.position = "bottom",
         legend.text = element_text(face = "italic", size = 10), 
-       plot.tag = element_text(face = "bold"))
+        plot.tag = element_text(face = "bold"))
 
 
+fig3 <- fig3a/fig3b
 
-fig3a/fig3b
+# Saving figs
+#jpeg
+ggsave(filename = "./results/fig3ab.jpeg",
+       width = 10,
+       height = 18,
+       dpi=700,
+       units = "in",
+       bg = "white")
 
-# Saving plot
-# ggsave(filename = "./results/fig3ab.jpeg",
-#        width = 10,
-#        height = 18,
-#        dpi=700,
-#        units = "in",
-#        bg = "white")
+#pdf
+ggsave(filename = "./results/fig3ab.pdf",
+       width = 10,
+       height = 18,
+       dpi=700,
+       units = "in",
+       bg = "white")
+
+
+rm(fig3a, fig3b, fig3, io_alluv_df1, io_alluv_df2, io_alluv_df3, io_alluv_df4, 
+   io_alluv_df5)
 
 
 # Supporting Stats (Part 3) -----------------------------------------------
 
 ## Discrepancies in prod. to cons. ----------------------------------------
 
-# TODO: Code efficiency improvement; at this moment this is a quite cumbersome
-# way to put flows together, particularly for upper/lower bounds. This section
-# is currently being improved.
+# TODO: N.B. Code efficiency improvement: At this moment this is a quite
+# cumbersome way to put flows together, particularly for upper/lower bounds.
+# This section is currently being improved, nonetheless values (and particularly
+# their magnitude) are not expected to change.
 
 # Pre-process strings for full io
 start_time <- Sys.time()
@@ -2685,16 +3030,18 @@ io_mun_all <- io_CPF_CNPJ_GEOCMUN|>
   mutate(INDEX = case_when(INDEX != "0" ~ "1", TRUE ~ INDEX)) #Index 1 means discrepancy
 end_time <- Sys.time()
 end_time - start_time
+rm(start_time, end_time)
 
 # Check totals to see consequences of filtering small numbers. 
 sum(io_CPF_CNPJ_GEOCMUN$RWE)  
 sum(io_mun_all$RWE)
 
 # N.B. io_CPF_CNPJ_GEOCMUN contains the long-form data for the output square
-# matrix. Since the original is sparce, several origin-destination values are
-# zero (or very small values) the root of inefficiencies here. Filtering zeros
-# and such small values supports processing for reproducing the work fast,
-# nonetheless for full reproduction one should comment out " #filter(RWE > 0)"
+# matrix. Since the original matrix is sparce, several origin-destination values
+# are zero (or very small values) the root of inefficiencies here. Filtering
+# zeros and such small values supports processing for reproducing the work at
+# greater speed, nonetheless for full reproduction one can comment out "
+# #filter(RWE > 0)"
 
 
 # VYC Baseline: 44.45
@@ -2708,7 +3055,7 @@ sum(io_mun_all$RWE)
 
 
 # N.B. In order to reproduce the upper/lower boundary figures, run the
-# "input-output-model.R" changing the base conversion factor "base_vyc". 
+# "input-output-model.R" changing the base conversion factor "base_vyc".
 
 
 # Pre-process strings for the share of valid consumption
@@ -2774,11 +3121,6 @@ sum(rw$VOLUME)
 # Total volume entering from other states 
 sum(p_outer_state$RWE_OUTER_STATE)
 
-#TODO: Correct text in manuscript to 2.1. as it makes reference to "2,069,222.7"
-#N.B. ..."2.0 Mm3 RWE (1.8-2.6 Mm3 RWE using a high (53.9%) and low (35%)
-#overall sawmill efficiency in timber processing, respectively; see Methods)."
-
-
 # Total volumes
 io_mun_all |> # io_mun_all had no removals from io_CPF_CPF_GEOCMUN
   group_by(INDEX) |> 
@@ -2815,8 +3157,8 @@ io_mun_all |> # io_mun_all had no removals from io_CPF_CPF_GEOCMUN
 # 2009-2019, with an additional 0.17 Mm3 (roundwood equivalent, RWE) entering the
 # supply-chain from other federal units."
 
-# N.B. ..."(1.8-2.6 Mm3 RWE using a high (53.9%) and low (35%)
-# overall sawmill efficiency in timber processing, respectively; see Methods)."
+#N.B. ..."2.1 Mm3 RWE (1.8-2.6 Mm3 RWE using a high (53.9%) and low (35%)
+#overall sawmill efficiency in timber processing, respectively; see Methods)."
 
 
 # Total percentages
@@ -2867,7 +3209,7 @@ top_share_mun <- share_mun|>
 # Volume
 sum((share_mun |> filter(name_muni %in% top_share_mun))$DISCREPANCY)
 # 44.5
-# 41372.68884173
+# 341372.68884173
 
 # 35
 # 529159.74607905
@@ -3017,11 +3359,9 @@ sum((io_mun_all|> filter(CPF_CNPJ_DESTINATION %in% c("EXPORT")))$RWE)
 #44.5
 #1411796.1443163
 
-#TODO: revise this figure should not be outside boundaries)
 #35
 #2591964.8237454 
 
-#TODO: revise this figure should not be outside boundaries)
 #53
 #1779646.0540712
 
@@ -3036,6 +3376,27 @@ sum((io_mun_all|> filter(CPF_CNPJ_DESTINATION %in% c("EXPORT")))$RWE)/sum(io_mun
 #0.65421479263048
 
 
+
+
+# References --------------------------------------------------------------
+
+options(citation.bibtex.max=999)
+
+citation()
+citation("ggplot2")
+citation("scatterpie")
+citation("ggalluvial")
+citation("patchwork")
+citation("tidyverse")
+citation("ggpmisc")
+citation("janitor")
+citation("geobr")
+citation("sf")
+citation("tmap")
+citation("scales")
+citation("paletteer")
+citation("scico")
+citation("reshape2")
 
 
 
