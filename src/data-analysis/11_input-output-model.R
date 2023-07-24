@@ -1,14 +1,16 @@
 # Input-Output model application ------------------------------------------
 
-# This script is currently under development/refinement. This script contains
-# the implementation of the environmentally extended input-output analysis for
-# the ipê timber supply chain for the case of Pará, Brazil between 2009-2019. It
-# also provides more details on rationale behind flow inclusion for this
-# analysis, following descriptions under methods and supplementary text. 
+# This script contains the implementation of the environmentally extended
+# input-output analysis for the ipê timber supply chain for the case of Pará,
+# Brazil between 2009-2019 and it is based on methodological steps described in
+# Kastner et al 2011. It also provides more details on rationale behind flow
+# inclusion for this analysis, following descriptions under methods and
+# supplementary text.
 
-# Reach out if you have suggestions for improvement, feedback or ideas for
-# collaboration. See https://github.com/carolsrto/illegality-risk-ns or e-mail
-# directly at caroline.franca@chalmers.se
+# Despite being the latest version, all scripts related to this study are
+# work-in-progress and so suggestions for improvement and comments are always
+# most welcome. Reach out through https://github.com/carolsrto/illegality-risk-ns 
+# or e-mail directly at caroline.franca@chalmers.se
 
 
 
@@ -746,8 +748,7 @@ rwe_sp_pre <- sp_matrix_df5 |>
 
 ## Contextual stats  -----------------------------------------------------------
 
-#TODO: under development; add any contextual stats needed to support rationale
-#for removals and assessment of magnitude of changes pre/post RWE conversion.
+
 
 ## Visualizing product groups by conversion -------------------------------------
 

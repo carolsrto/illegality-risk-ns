@@ -1,18 +1,19 @@
 # Mapping illegality risks and outputs of the EEIO analysis -------------------
 
-# This script is currently under development/refinement. It contains all code
-# needed for the reproduction of the figures and statistics from "Putting
-# numbers on timber illegality risk: the case of ipê in Pará", currently under
-# review.
+# This script contains all code needed for the reproduction of the figures and
+# statistics from "Quantifying timber illegality risk in the Brazilian forest
+# frontier".
 
-# This version includes material for both main and supplementary figures and
-# texts. Main figures and associated data wrangling and analyses are presented
-# first, followed by supplementary material and it has been organized -- as far
-# as possible -- in the same sequence as the main text.
+# It includes material for both main and supplementary figures and texts. Main
+# figures/graphs and any associated data wrangling and analyses are presented
+# first, followed by supplementary material. It has been organized -- as far as
+# possible -- to follow the sequence of the main text. Some text excerpts are
+# added throughout to facilitate connection between main text and code.
 
-# Reach out if you have suggestions for improvement, feedback or ideas for
-# collaboration. See https://github.com/carolsrto/illegality-risk-ns or e-mail
-# directly at caroline.franca@chalmers.se
+# Despite being the latest version, all scripts related to this study are
+# work-in-progress and so suggestions for improvement and comments are always
+# most welcome. Reach out through https://github.com/carolsrto/illegality-risk-ns 
+# or e-mail directly at caroline.franca@chalmers.se
 
 
 
@@ -57,9 +58,10 @@ load("./data/processed/illegality-risk-vyc44-v1.1.Rdata")
 # - transport_df2: subset of all relevant transport transactions.
 
 # Outputs of EEIO model: 
-# N.B. Objects reflect the mid-point conversion efficiency of 44.5. To obtain statistics 
-# and figures for upper-lower boundaries (i.e. high efficiency: 53.9, low efficiency: 35)
-# Go back to the "input_output_model.R" and change VYC to the desired value. 
+# N.B. Objects reflect the mid-point conversion efficiency of 44.5. To obtain
+# statistics and figures for upper-lower boundaries (i.e. high efficiency: 53.9,
+# low efficiency: 35) Go back to the "input_output_model.R" and change VYC to the
+# desired value.
 
 # - io_CPF_CNPJ_GEOCMUN: main output from the EEIO model
 # - ee_valid_cons: env. extension share for valid lp
@@ -75,12 +77,14 @@ mun <- geobr::read_municipality(code_muni = "all", year = "2020")
 # - states: states data, available from:
 states <- geobr::read_state(year = "2020")
 
-# RADAM 
+# RADAM: 
 # N.B. Instructions for loading data for the replication of Brancalion et al.
-# 2018 code used as a basis for analysis of overstated yield can be found directly 
-# in the section "Fig. 2 Species yield estimation". The following loaded data objects 
-# can be used to speed up reproduction of Suppl. Fig. S4 and further instructions 
-# are provided in the code for independent reproduction of objects.
+# 2018 code used as a basis for analysis of overstated yield can be found
+# directly in the section "Fig. 2 Species yield estimation". The following
+# loaded data objects can be used to speed up reproduction of Supplementary Fig.
+# S4 and further instructions are provided in the code for independent
+# reproduction of objects.
+
 # - dados_19ha, dados_66ha, dados_370ha: statistics summary of simulation 
 # - radam_hist_19ha, radam_hist_66ha, radam_hist_370ha: simulation histograms at 
 # different minimum area thresholds
@@ -121,6 +125,7 @@ mun_pa <- mun|>  filter(abbrev_state == "PA")
 # tm_shape(states) +
 #   tm_basemap("Stamen.TonerLite") +
 #   tm_polygons(alpha = 0,  border.col = "Red")
+
 
 
 # Fig 1 Mapping forest of origin -----------------------------------------
@@ -166,14 +171,14 @@ data_fig1 <- data_fig1 |>
                                                     "ESTORNADO ITEM") ~ "AUTEX", 
                                    TRUE ~ as.character(NA)))
 
-# N.B. At this moment we treat AUTEX data as a standalone category, not
-# distinguishing between status reported in this dataset (i.e. EMITIDA OFERTA,
-# ESTORNADO ITEM, etc.). We found most timber entering the supply chain from
-# AUTEX would be connected to "ESTORNADO ITEM", which is a category when credits
-# are issued then credited back e.g. because a shipment was not sent, etc. This
-# is at odds with the "RECEIVED" cargo from which we derive flows. Thus, given
+# N.B. We treat AUTEX data as a standalone category, not distinguishing between
+# status reported in this dataset (i.e. EMITIDA OFERTA, ESTORNADO ITEM, etc.).
+# We found most timber entering the supply chain from AUTEX would be connected
+# to "ESTORNADO ITEM", which is a category when credits are issued then credited
+# back e.g. because a shipment was not sent, etc. This is at odds with the
+# "RECEIVED" cargo which confirms the transaction occurred. Thus, given
 # ambiguity and lack of metadata to clarify standing of this share we do not
-# evaluate status. 
+# evaluate status for this share.
 
 # Data check
 data_fig1 |> group_by(LP_STATUS, STATUS_GROUP1) |> count()
@@ -317,7 +322,7 @@ fig1a <- fig1a_base +
   theme(plot.title.position = "plot", 
         plot.title = element_text(face="bold"))
 
-# N.B. Warnings are for rows with no coordinates
+# N.B. Warnings are for rows with no coordinates.
 
 
 
@@ -420,6 +425,7 @@ rm(mun_pa_vol, vol_by_mun, data_col, lp_barplot, key_rw_lp, data_line,
 # https://www.color-blindness.com/coblis-color-blindness-simulator/ The only
 # problematic would be Achromatopsia. This can be addressed via the
 # supplementary facet wrap on individual view of valid, invalid and AUTEX.
+
 
 
 # Supporting Stats (Part 1) --------------------------------------------------
@@ -588,11 +594,12 @@ top_mun
 # Prainha, 
 # Santarém
 
-
-# N.B. "...with nearly 49% of timber extracted reportedly coming from western flank
-# of Altamira (the largest Brazilian municipality, covering significant portion
-# of mid-state Para) and Juruti (bordering the Amazonas state and harboring
-# the first high capacity port entering Par ́ a from the west."
+# N.B. "Meanwhile, seven of the top ten pro-ducing municipalities in 2019 were
+# located westward of these, with nearly 49% of ipê reportedly coming from the
+# western flank of Altamira (the largest Brazilian municipality, covering a
+# significant  portion of mid-state Pará) and Juruti (bordering the Amazonas
+# state and harbouring the first high-capacity port entering Pará from the
+# west)"
 
 
 
@@ -701,9 +708,8 @@ top_mun <-
 sum((data_stats_mun_inv |> filter(MUNICIPALITY %in% top_mun))$VOLUME)/sum(rw$VOLUME)
 #[1] 0.38811192266398
 
-# N.B. ..."Santarém, Juruti and Prainha are municipalities where most volume from
-# invalid permits originated, together accounting for 39% of invalid permits
-# (Suppl. Fig. S1c-d)."
+# N.B."Three municipalities—Santarém, Juruti and Prainha—together account for
+# 39% of these invalid permits (Supplementary Fig. 2c,d)."
 
 # Clean env. 
 rm(top_mun)
@@ -869,10 +875,13 @@ data_type_lp  |>
 # 92% AUTEF (state-level), 7% AUTEX-PMFS (national-level), 0.08% AUTEX-Legal Def, 
 # 1.1% Undetermined 
 
-#N.B. "Nearly all ipê production comes from Sustainable Forest Management Plans
-# (PMFS), most of which (92% of volume) have logging permits authorized at
-# state-level and 7% originated from enterprises licensed under national
-# jurisdiction..."
+# N.B. SN1: "...nearly all ipˆe production comes from Sustainable Forest
+# Management Plans (PMFS), most of which (92% of volume) have logging permits
+# authorized at state-level and 7% originated from venterprises licensed under
+# national jurisdiction, mainly concessions and—to a lesser
+# extent—community-based forest management operations...." "...It is worth
+# noting we found only a insignificant amount (<0.1%) comes from legal
+# deforestation (or as referred to across regulations, vegetation suppression)."
 
 
 # Figures for share of permit type by year
@@ -900,6 +909,11 @@ join_vol_lp_stats_mun |>
 ## Details on missing/inv. permits -----------------------------------------------
 
 data_fig1|> group_by(LP_SOURCE) |> count()
+# N.B.: LP_SOURCE is a string created in the pre-processing step
+# "XX_logging-permirt.R" to keep track of where the lp has been found (that is,
+# in the AUTEF UPA shapefile, in the scrapping of the AUTEf PDFs, in the AUTEX
+# or AUTEX additional info "Original LP", in the Brancalion et al. 2018 study or
+# the IBAMA 2019)
 
 # # A tibble: 17 × 2
 # # Groups:   LP_SOURCE [17]
@@ -966,7 +980,7 @@ data_stats_mun_inv |>
 # 1 AUTEX         0.0694
 # 2 INVALID       0.162 
 # 3 UNDETERMINED  0.0184 (missing share)
-# 4 VALID         0.751 
+# 4 VALID         0.751  ("While about 76% of ipê volume...")
 # 5 Total         1 
 
 # Same as the following: 
@@ -1089,6 +1103,7 @@ data_fig2_autex  <- data_fig1 |>
 data_fig2_valid_and_autex <- data_fig1 |> 
   filter(STATUS_GROUP3 %in% c("EXPIRED", "EXTENDED", "AUTEX")) |> 
   mutate(YIELD = VOLUME/AREA_HA)
+
 
 
 ## Checking on outliers (yield, area) ----------------------------------------
@@ -1911,15 +1926,15 @@ rm(fig2a, fig2b, figS3a, figS3b, figS3c, figS3d, colors, mids_lp, mids_radam,
 
 ## Overstated ipe yields ---------------------------------------------------
 
-# Previous analysis include all permits valid, invalid and autex. Some of the
-# figures below are based only on valid permits and Autex (federal-issued
+# Previous analyses include all permits valid, invalid and autex. Some of the
+# figures below are based only on valid permits and AUTEX (federal-issued
 # logging permits)
 
 # Average yield for logging permits
 dados$MEAN.LICENSAS
 # average only for valid permits
-# data_fig2_valid |> 
-#   summarise(mean(YIELD))
+data_fig2_valid |>
+  summarise(mean(YIELD))
 #mean.licensas
 sd.licensas 
 # SD stats only for valid permits
@@ -2015,6 +2030,7 @@ data_fig2_valid |>
 29/1103*100
 
 
+
 # Clean env.
 rm(dados, t.radam, t.licensas, sd.radam, sd.licensas,
    mean.radam, median.radam, q90.radam, q95.radam, q99.radam,
@@ -2030,9 +2046,9 @@ rm(t.hist.autef, t.hist.radam, col.autef, col.radam, range.autef, range.radam,
    x, y, n, y.max)
 
 
-## Suppl. Fig. S4 Sensitivity RADAM yield distribution simulation ------------
+## Suppl. Fig. S4 Sensitivity RADAM yield distribution simulation ----------
 
-### Suppl. Fig. S4a -----------------------------------------------------------------
+### Suppl. Fig. S4a --------------------------------------------------------
 # Quartile-based simulation check 
 
 # What areas to consider? 
@@ -2223,6 +2239,7 @@ rm(vol_inset, vol_inset1, vol_inset2, vol_inset3, radam_hist_19ha, radam_hist_66
    dados_370ha)
 
 rm(figS4, figS4a, figS4b, figS4c)
+
 
 
 ## Suppl. Fig. S5 ------------------------------------------------------------
@@ -3012,10 +3029,13 @@ rm(fig3a, fig3b, fig3, io_alluv_df1, io_alluv_df2, io_alluv_df3, io_alluv_df4,
 
 ## Discrepancies in prod. to cons. ----------------------------------------
 
-# TODO: N.B. Code efficiency improvement: At this moment this is a quite
-# cumbersome way to put flows together, particularly for upper/lower bounds.
-# This section is currently being improved, nonetheless values (and particularly
-# their magnitude) are not expected to change.
+# TODO: Code improvement: Below/This is a quite cumbersome way to put flows
+# together, particularly for upper/lower sawmill efficiency figures and this is
+# why you will see some prints saved below. As mentioned at the start, the code
+# is tailored to add one VYC (low, mid, upper values) for each start of the
+# input-output analysis. While this can be improved in the future, nonetheless
+# values (and particularly their magnitude) are not expected to change beyond
+# marginal changes.
 
 # Pre-process strings for full io
 start_time <- Sys.time()
@@ -3197,6 +3217,14 @@ io_mun_all |> # io_mun_all had no removals from io_CPF_CPF_GEOCMUN
 #supply chain in Para cannot be traced to a forest of origin (or to an inflow
 #from other states)"
 
+# N.B. ..."The figures contrast with the amount of timber originated in the state
+# being consumed nationally and abroad, which, according to the same data,
+# amounts to nearly twice as much: 2.1 Mm 3 RWE (1.8–2.6 Mm 3 RWE using a high
+# (53.9%) and low (35%) overall sawmill efficiency in timber processing,
+# respectively; see Methods). Consequently, 37–54% (0.65–1.39 Mm 3) of the total
+# ipê volume entering the supply chain in Pará cannot be traced to a forest of
+# origin (or to an inflow from other states) (Fig. 3)"
+
 
 # Stats on discrepancy, 44.5 (Numbers may change slightly)
 # Top mun discrepancy
@@ -3377,7 +3405,6 @@ sum((io_mun_all|> filter(CPF_CNPJ_DESTINATION %in% c("EXPORT")))$RWE)/sum(io_mun
 
 
 
-
 # References --------------------------------------------------------------
 
 options(citation.bibtex.max=999)
@@ -3397,6 +3424,5 @@ citation("scales")
 citation("paletteer")
 citation("scico")
 citation("reshape2")
-
 
 
