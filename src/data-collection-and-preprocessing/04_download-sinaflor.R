@@ -34,7 +34,7 @@ years <- as_tibble(c(2007:2020))
 # Auto-download -----------------------------------------------------------
 
 #specify folder for data dump
-setwd("./data/raw/transport-sinaflor")
+setwd("./data/raw/sinaflor")
 
 #i indexes through the states, j  indexes through dataset type, k indexes though year
 for (i in (1:27)){  #set this to length states
