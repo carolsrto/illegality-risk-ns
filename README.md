@@ -1,8 +1,8 @@
 # Repository Overview
-This repository is under development. It contains the reproduceability package for the study *Putting numbers on timber illegality risk: the case of ipê in Pará*. Data utilized in the reproduction of this study is available on Zenodo at [https://doi.org/10.5281/zenodo.8068431](https://doi.org/10.5281/zenodo.8068431)
+This repository contains the reproduceability package for the study *Quantifying timber illegality risk in the Brazilian forest frontier*. Data utilized in the reproduction of this study is available on Zenodo at [https://doi.org/10.5281/zenodo.8068431](https://doi.org/10.5281/zenodo.8068431)
 
 ## Citation
-Franca, S.S.C., Persson, M., Carvalho, T., Lentini, M. Putting numbers on timber illegality risk: the case of ipê in Pará, 21 December 2022, PREPRINT (Version 1) available at Research Square [https://doi.org/10.21203/rs.3.rs-2297880/v1]
+Franca, C.S.S., Persson, U.M., Carvalho, T., Lentini, M. Quantifying timber illegality risk in the Brazilian forest frontier (forthcoming). Nat. Sust. (2023) [https://doi.org/10.1038/s41893-023-01189-3]
 
 ## Repository Content 
 
@@ -12,19 +12,21 @@ Code
 - implementation of input-output model and environmental extensions
 - manuscript graphics 
 - LaTeX files
+- code where individual actors are not anonymized have been ommitted from the repository but can be made available upon request
 
 Data 
 - documentation of sources and aquisition
 - data is not part of the repository 
-- a *processed* (intermediary) dataset (will be) available via Zenodo 
+- a *processed* (intermediary) dataset is available via Zenodo 
 - other data are available from authors upon request 
 
 ## Instructions for results reproduction
 
 For a *last mile* reproduction of study numbers and figures, load the "illegality-risk-vyc44-v1.1.Rdata". The file can be directly used with *mapping-illegality-risks.R*.
 
-For the reproduction of the "input-output-model.R" analysis, the needed data objects are available from "illegality-risk-v1.1.Rdata".     
+For the reproduction of the "input-output-model.R" analysis, the needed data objects are available from "illegality-risk-v1.1.Rdata".
 
+For a full reproduction (from data collection through pre-processing and analysis), you can follow the repository structure below. Not all scripts have been added at this point given anonymization steps needed, but these can be made available upon request.
 
 ## Repository Structure
 
