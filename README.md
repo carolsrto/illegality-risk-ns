@@ -2,7 +2,7 @@
 This repository contains the reproduceability package for the study *Quantifying timber illegality risk in the Brazilian forest frontier*. Data utilized in the reproduction of this study is available on Zenodo at [https://doi.org/10.5281/zenodo.8068431](https://doi.org/10.5281/zenodo.8068431)
 
 ## Citation
-Franca, C.S.S., Persson, U.M., Carvalho, T., Lentini, M. Quantifying timber illegality risk in the Brazilian forest frontier (forthcoming). Nat. Sust. (2023) [https://doi.org/10.1038/s41893-023-01189-3]
+Franca, C.S.S., Persson, U.M., Carvalho, T., Lentini, M. Quantifying timber illegality risk in the Brazilian forest frontier. Nat Sustain 6, 1485–1495 (2023). [https://doi.org/10.1038/s41893-023-01189-3]
 
 ## Repository Content 
 
